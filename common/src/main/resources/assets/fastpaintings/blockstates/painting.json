@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "fastpaintings:block/painting",
+      "y": 270
+    },
+    "facing=north": {
+      "model": "fastpaintings:block/painting",
+      "y": 180
+    },
+    "facing=south": {
+      "model": "fastpaintings:block/painting"
+    },
+    "facing=west": {
+      "model": "fastpaintings:block/painting",
+      "y": 90
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "minVersion": "0.8",
+  "required": true,
+  "compatibilityLevel": "JAVA_17",
+  "package": "net.mehvahdjukaar.fastpaintings.mixins",
+  "mixins": [
+    "HangingentityMixin"
+  ],
+  "client": [
+    "PaintingRendererHackMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
