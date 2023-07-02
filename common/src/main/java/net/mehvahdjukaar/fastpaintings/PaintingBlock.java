@@ -27,7 +27,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
 
-public class FastPaintingBlock extends WaterBlock implements EntityBlock {
+public class PaintingBlock extends WaterBlock implements EntityBlock {
 
     protected static final VoxelShape SHAPE_NORTH = Block.box(0.0D, 0.0D, 15.0D, 16.0D, 16.0D, 16.0D);
     protected static final VoxelShape SHAPE_SOUTH = MthUtils.rotateVoxelShape(SHAPE_NORTH, Direction.SOUTH);
@@ -37,7 +37,7 @@ public class FastPaintingBlock extends WaterBlock implements EntityBlock {
     protected static final IntegerProperty DOWN_OFFSET = IntegerProperty.create("y_offset", 0, 5);
     protected static final IntegerProperty RIGHT_OFFSET = IntegerProperty.create("x_offset", 0, 5);
 
-    public FastPaintingBlock(Properties properties) {
+    public PaintingBlock(Properties properties) {
         super(properties);
         this.registerDefaultState(this.defaultBlockState()
                 .setValue(DOWN_OFFSET, 0)

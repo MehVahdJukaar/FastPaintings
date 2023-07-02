@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.fastpaintings;
 
 import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import net.mehvahdjukaar.moonlight.api.client.model.CustomBakedModel;
@@ -42,16 +43,28 @@ public class PaintingBlockModelLoader implements CustomModelLoader {
                 "right",
                 "right_left"
         );
-        var map = l.stream().collect(Collectors.toMap(s -> s, s -> ClientHelper.parseBlockModel(json.get(s))));
+
+        var map = l.stream().collect(Collectors.toMap(s -> s, json::get));
         return new Geometry(map);
     }
 
 
-    private record Geometry(Map<String, BlockModel> models) implements CustomGeometry {
+    private record Geometry(Map<String, JsonElement> models) implements CustomGeometry {
 
         @Override
         public CustomBakedModel bake(ModelBaker modelBakery, Function<Material, TextureAtlasSprite> spriteGetter, ModelState transform, ResourceLocation location) {
-            var map = models.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, m -> m.getValue().bake(modelBakery, m.getValue(), spriteGetter, transform, location, true)));
+            var map = models.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,
+                    e -> {
+                        var j = e.getValue();
+                        BlockModel model;
+                        if (j.isJsonPrimitive()) {
+                            model = (BlockModel) modelBakery.getModel(ResourceLocation.tryParse(j.getAsString()));
+                        } else {
+                            model = ClientHelper.parseBlockModel(j);
+                        }
+                        model.resolveParents(modelBakery::getModel);
+                        return model.bake(modelBakery, model, spriteGetter, transform, location, true);
+                    }));
             return new PaintingBlockModel(map);
         }
     }

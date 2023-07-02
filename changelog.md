@@ -1,1 +1,1 @@
-you can now fully customize a painting model
+improved painting model

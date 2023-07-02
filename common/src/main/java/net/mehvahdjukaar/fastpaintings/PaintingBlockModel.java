@@ -71,8 +71,8 @@ public class PaintingBlockModel implements CustomBakedModel {
         float segmentWScale = sprite.contents().width() / (float) variant.getWidth();
         float segmentHScale = sprite.contents().height() / (float) variant.getHeight();
 
-        int rightOffset = state.getValue(FastPaintingBlock.RIGHT_OFFSET);
-        int downOffset = state.getValue(FastPaintingBlock.DOWN_OFFSET);
+        int rightOffset = state.getValue(PaintingBlock.RIGHT_OFFSET);
+        int downOffset = state.getValue(PaintingBlock.DOWN_OFFSET);
         int paintingW = variant.getWidth() / 16;
         int paintingH = variant.getHeight() / 16;
 
@@ -116,8 +116,8 @@ public class PaintingBlockModel implements CustomBakedModel {
 
     @Override
     public ExtraModelData getModelData(@Nullable ExtraModelData originalTileData, BlockPos pos, BlockState state, BlockAndTintGetter level) {
-        if (state.getBlock() instanceof FastPaintingBlock && !FastPaintingBlock.isMaster(state)) {
-            var tile = FastPaintingBlock.getMaster(state, pos, level);
+        if (state.getBlock() instanceof PaintingBlock && !PaintingBlock.isMaster(state)) {
+            var tile = PaintingBlock.getMaster(state, pos, level);
             if (tile != null) return tile.getExtraModelData();
         }
         return originalTileData;

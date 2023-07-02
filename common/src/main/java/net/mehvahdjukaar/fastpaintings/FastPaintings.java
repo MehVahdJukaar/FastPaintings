@@ -32,7 +32,7 @@ public class FastPaintings {
 
     public static final Supplier<Block> PAINTING_BLOCK = RegHelper.registerBlock(
             res("painting"),
-            () -> new FastPaintingBlock(BlockBehaviour.Properties.of()
+            () -> new PaintingBlock(BlockBehaviour.Properties.of()
                     .pushReaction(PushReaction.DESTROY)
                     .mapColor(MapColor.NONE)
                     .instabreak()
