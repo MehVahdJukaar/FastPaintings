@@ -1,1 +1,1 @@
-you can now fully customize a painting model
+fixed version

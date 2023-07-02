@@ -1,5 +1,6 @@
 {
     "loader": "fastpaintings:painting",
+
     "center": {
 		"credit": "Made with Blockbench",
 		"elements": [
