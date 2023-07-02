@@ -130,7 +130,7 @@ public class PaintingBlock extends WaterBlock implements EntityBlock {
                 for (int x = 0; x < width; x++) {
                     for (int y = 0; y < height; y++) {
                         BlockPos p = pos.below(y).relative(dir.getCounterClockWise(), x);
-                        level.removeBlock(p, false);
+                        if(level.getBlockState(p).is(this)) level.removeBlock(p, false);
                     }
                 }
             } else level.removeBlock(pos, false);
@@ -205,8 +205,6 @@ public class PaintingBlock extends WaterBlock implements EntityBlock {
                 pe.requestModelReload();
 
                 entity.discard();
-                level.getServer().tell(new TickTask(1,
-                        () -> level.getServer().tell(new TickTask(1, entity::discard))));
             }
         }
     }
