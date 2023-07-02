@@ -102,7 +102,7 @@ public class PaintingBlockModel implements CustomBakedModel {
 
     @Override
     public boolean useAmbientOcclusion() {
-        return false;
+        return true;
     }
 
     @Override

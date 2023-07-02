@@ -20,7 +20,7 @@ public abstract class HangingentityMixin extends Entity {
 
     @Inject(method = "tick", at = @At("RETURN"))
     public void tick(CallbackInfo ci){
-        if(this.firstTick && !level.isClientSide && this.isAlive() && this.getType() == EntityType.PAINTING){
+        if(this.tickCount < 3 && !level.isClientSide && this.isAlive() && this.getType() == EntityType.PAINTING){
             PaintingBlock.tryConverting((Painting)(Object)this);
         }
     }

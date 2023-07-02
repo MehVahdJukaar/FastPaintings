@@ -12,6 +12,8 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.decoration.PaintingVariant;
 import net.minecraft.world.entity.decoration.PaintingVariants;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
@@ -26,6 +28,7 @@ public class PaintingBlockEntity extends BlockEntity implements IExtraModelDataP
     public PaintingBlockEntity(BlockPos blockPos, BlockState blockState) {
         super(FastPaintings.PAINTING_TILE.get(), blockPos, blockState);
         this.variant = getDefaultVariant();
+        Item.BY_BLOCK.put(FastPaintings.PAINTING_BLOCK.get(), Items.PAINTING);
     }
 
     @Override

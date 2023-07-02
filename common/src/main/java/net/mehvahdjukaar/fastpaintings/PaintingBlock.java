@@ -4,9 +4,12 @@ import net.mehvahdjukaar.moonlight.api.block.WaterBlock;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.server.TickTask;
 import net.minecraft.world.entity.decoration.HangingEntity;
 import net.minecraft.world.entity.decoration.Painting;
+import net.minecraft.world.entity.decoration.PaintingVariant;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.*;
@@ -58,6 +61,7 @@ public class PaintingBlock extends WaterBlock implements EntityBlock {
         return super.getCollisionShape(state, level, pos, context);
     }
 
+
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         super.createBlockStateDefinition(builder);
@@ -87,43 +91,43 @@ public class PaintingBlock extends WaterBlock implements EntityBlock {
 
     @Override
     public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
-       var m = getMaster(state, pos, level);
-       if(m != null){
-           pos = m.getBlockPos();
-           Direction dir = state.getValue(FACING);
-           var variant = m.getVariant();
+        var m = getMaster(state, pos, level);
+        if (m != null) {
+            pos = m.getBlockPos();
+            Direction dir = state.getValue(FACING);
+            var variant = m.getVariant();
 
-           int width = variant.value().getWidth() / 16;
-           int height = variant.value().getHeight() / 16;
+            int width = getWidth(variant);
+            int height = getHeight(variant);
 
-           for (int x = 0; x < width; x++) {
-               for (int y = 0; y < height; y++) {
-                   BlockPos p = pos.below(y).relative(dir.getCounterClockWise(), x);
-                   var b = level.getBlockState(p);
-                   if(!b.is(this) || b.getValue(FACING) != dir ||
-                           b.getValue(DOWN_OFFSET) != y ||
-                   b.getValue(RIGHT_OFFSET) != x){
-                       return false;
-                   }
-               }
-           }
-           return true;
-       }
-       return false;
+            for (int x = 0; x < width; x++) {
+                for (int y = 0; y < height; y++) {
+                    BlockPos p = pos.below(y).relative(dir.getCounterClockWise(), x);
+                    var b = level.getBlockState(p);
+                    if (!b.is(this) || b.getValue(FACING) != dir ||
+                            b.getValue(DOWN_OFFSET) != y ||
+                            b.getValue(RIGHT_OFFSET) != x) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+        return false;
     }
 
     @Override
     public void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, BlockPos fromPos, boolean isMoving) {
         super.neighborChanged(state, level, pos, block, fromPos, isMoving);
-        if(!canSurvive(state, level, pos)){
+        if (!canSurvive(state, level, pos)) {
             var m = getMaster(state, pos, level);
-            if(m != null){
+            if (m != null) {
                 pos = m.getBlockPos();
                 Direction dir = state.getValue(FACING);
                 var variant = m.getVariant();
 
-                int width = variant.value().getWidth() / 16;
-                int height = variant.value().getHeight() / 16;
+                int width = getWidth(variant);
+                int height = getHeight(variant);
 
                 for (int x = 0; x < width; x++) {
                     for (int y = 0; y < height; y++) {
@@ -131,8 +135,16 @@ public class PaintingBlock extends WaterBlock implements EntityBlock {
                         level.removeBlock(p, false);
                     }
                 }
-            }else level.removeBlock(pos, false);
+            } else level.removeBlock(pos, false);
         }
+    }
+
+    private static int getHeight(Holder<PaintingVariant> variant) {
+        return variant.value().getHeight() / 16;
+    }
+
+    private static int getWidth(Holder<PaintingVariant> variant) {
+        return variant.value().getWidth() / 16;
     }
 
     @Override
@@ -152,9 +164,9 @@ public class PaintingBlock extends WaterBlock implements EntityBlock {
         Direction dir = entity.getDirection();
         var variant = entity.getVariant();
 
-        int width = variant.value().getWidth() / 16;
-        int height = variant.value().getHeight() / 16;
-
+        int width = getWidth(variant);
+        int height = getHeight(variant);
+        if (width > 5 || height > 5) return;
         var bb = entity.getBoundingBox();
         //bad code ahead
         BlockPos pos = switch (dir) {

@@ -15,7 +15,7 @@ authors="MehVahdJukaar" #optional
 description='''Makes paintings way faster by turning them into blocks! Also allows customizing their model'''
 
 displayURL="https://www.curseforge.com/minecraft/mc-mods/fast-paintings" #optional
-issueTrackerURL="https://www.curseforge.com/minecraft/mc-mods/fast-paintings/issues" #optional
+issueTrackerURL="https://www.curseforge.com/minecraft/mc-mods/fastpaintings/issues" #optional
 itemIcon="minecraft:painting" #catalogue icon
 
 
