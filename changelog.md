@@ -1,1 +1,1 @@
-fixed loot
+you can now fully customize a painting model

@@ -4,6 +4,8 @@ import net.mehvahdjukaar.fastpaintings.FastPaintings;
 import net.mehvahdjukaar.fastpaintings.FastPaintingsClient;
 import net.mehvahdjukaar.moonlight.api.client.model.forge.BakedQuadBuilderImpl;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
+import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.fml.common.Mod;
 
 import static net.mehvahdjukaar.fastpaintings.FastPaintings.MOD_ID;

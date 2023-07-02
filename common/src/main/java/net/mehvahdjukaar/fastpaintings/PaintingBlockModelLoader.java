@@ -8,31 +8,46 @@ import net.mehvahdjukaar.moonlight.api.client.model.CustomBakedModel;
 import net.mehvahdjukaar.moonlight.api.client.model.CustomGeometry;
 import net.mehvahdjukaar.moonlight.api.client.model.CustomModelLoader;
 import net.mehvahdjukaar.moonlight.api.platform.ClientPlatformHelper;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.PaintingTextureManager;
 import net.minecraft.client.resources.model.*;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class PaintingBlockModelLoader implements CustomModelLoader {
 
 
     @Override
     public CustomGeometry deserialize(JsonObject json, JsonDeserializationContext context) throws JsonParseException {
-        return new Geometry(ClientPlatformHelper.parseBlockModel(json.get("model")));
+        List<String> l = List.of(
+                "center",
+                "top_bottom_left_right",
+                "top_bottom_left",
+                "top_bottom_right",
+                "top_bottom",
+                "top_left",
+                "top_right",
+                "top",
+                "bottom_left",
+                "bottom_right",
+                "bottom_right_left",
+                "bottom_right_top",
+                "bottom",
+                "left",
+                "right",
+                "right_left"
+        );
+        var map = l.stream().collect(Collectors.toMap(s -> s, s -> ClientPlatformHelper.parseBlockModel(json.get(s))));
+        return new Geometry(map);
     }
 
 
-    private record Geometry(BlockModel model) implements CustomGeometry {
+    private record Geometry(Map<String, BlockModel> models) implements CustomGeometry {
 
         @Override
         public Collection<Material> getMaterials(Function<ResourceLocation, UnbakedModel> modelGetter, Set<Pair<String, String>> missingTextureErrors) {
@@ -49,8 +64,8 @@ public class PaintingBlockModelLoader implements CustomModelLoader {
 
         @Override
         public CustomBakedModel bake(ModelBakery modelBakery, Function<Material, TextureAtlasSprite> spriteGetter, ModelState transform, ResourceLocation location) {
-            BakedModel bakedModel = this.model.bake(modelBakery, model, spriteGetter, transform, location, true);
-            return new PaintingBlockModel(bakedModel);
+            var map = models.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, m-> m.getValue().bake(modelBakery, m.getValue(), spriteGetter, transform, location, true)));
+            return new PaintingBlockModel(map);
         }
     }
 }

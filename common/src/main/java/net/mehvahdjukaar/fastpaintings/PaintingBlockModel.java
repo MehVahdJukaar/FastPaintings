@@ -5,7 +5,6 @@ import net.mehvahdjukaar.moonlight.api.client.model.CustomBakedModel;
 import net.mehvahdjukaar.moonlight.api.client.model.ExtraModelData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.block.BlockModelShaper;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
@@ -20,22 +19,41 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.decoration.PaintingVariant;
 import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 public class PaintingBlockModel implements CustomBakedModel {
 
     public static final ResourceLocation BACK_TEXTURE = new ResourceLocation("painting/back");
 
-    private final BakedModel paintingModel;
+    private final BakedModel[] models = new BakedModel[16];
 
-    public PaintingBlockModel(BakedModel paintingModel) {
-        this.paintingModel = paintingModel;
+    public PaintingBlockModel(Map<String, BakedModel> paintingModels) {
+        for (var e : paintingModels.entrySet()) {
+            String k = e.getKey();
+            int i = getIndex(k.contains("top"), k.contains("bottom"), k.contains("left"), k.contains("right"));
+            models[i] = e.getValue();
+        }
     }
+
+    public int getIndex(boolean top, boolean bottom, boolean left, boolean right) {
+        int index = 0;
+
+        index |= (top ? 1 : 0) << 3;
+        index |= (bottom ? 1 : 0) << 2;
+        index |= (left ? 1 : 0) << 1;
+        index |= right ? 1 : 0;
+
+        return index;
+    }
+
 
     @Override
     public List<BakedQuad> getBlockQuads(BlockState state, Direction side,
@@ -47,41 +65,54 @@ public class PaintingBlockModel implements CustomBakedModel {
             return List.of();
         }
 
-        List<BakedQuad> quads = paintingModel.getQuads(null, side, rand);
         PaintingTextureManager paintingTextureManager = Minecraft.getInstance().getPaintingTextures();
-
-        ResourceLocation name = paintingTextureManager.get(variant).getName();
+        ResourceLocation paintingTexture = paintingTextureManager.get(variant).getName();
         TextureAtlasSprite sprite = Minecraft.getInstance().getTextureAtlas(TextureAtlas.LOCATION_BLOCKS)
-                .apply(name);
+                .apply(paintingTexture);
+
         float segmentWScale = sprite.getWidth() / (float) variant.getWidth();
         float segmentHScale = sprite.getHeight() / (float) variant.getHeight();
 
-        float rightOff = state.getValue(PaintingBlock.RIGHT_OFFSET)
-                * (sprite.getU1() - sprite.getU0()) / (variant.getWidth() / 16f);
-        float downOff = state.getValue(PaintingBlock.DOWN_OFFSET)
-                * (sprite.getV1() - sprite.getV0()) / (variant.getHeight() / 16f);
+        int rightOffset = state.getValue(PaintingBlock.RIGHT_OFFSET);
+        int downOffset = state.getValue(PaintingBlock.DOWN_OFFSET);
+        int paintingW = variant.getWidth() / 16;
+        int paintingH = variant.getHeight() / 16;
 
-        List<BakedQuad> newList = new ArrayList<>();
-        for (BakedQuad q : quads) {
-            TextureAtlasSprite oldSprite = q.getSprite();
-            if (oldSprite.getName().equals(MissingTextureAtlasSprite.getLocation())) {
-                int stride = DefaultVertexFormat.BLOCK.getIntegerSize();
-                int[] v = Arrays.copyOf(q.getVertices(), q.getVertices().length);
-                for (int i = 0; i < v.length / stride; i++) {
-                    float originalU = Float.intBitsToFloat(v[i * stride + 4]);
-                    float originalV = Float.intBitsToFloat(v[i * stride + 5]);
+        float spriteRightOff = rightOffset * (sprite.getU1() - sprite.getU0()) / paintingW;
+        float spriteDownOff = downOffset * (sprite.getV1() - sprite.getV0()) / paintingH;
 
-                    float u1 = (originalU - oldSprite.getU0()) * segmentWScale + rightOff;
-                    v[i * stride + 4] = Float.floatToRawIntBits(u1 + sprite.getU0());
 
-                    float v1 = (originalV - oldSprite.getV0()) * segmentHScale + downOff;
-                    v[i * stride + 5] = Float.floatToRawIntBits(v1 + sprite.getV0());
-                }
-                newList.add(new BakedQuad(v, q.getTintIndex(), q.getDirection(), sprite, q.isShade()));
-            } else newList.add(q);
+        List<BakedQuad> combinedQuads = new ArrayList<>();
 
+        List<BakedModel> bakedModels = new ArrayList<>();
+        bakedModels.add(this.models[0]);
+        int index = getIndex(downOffset == 0, downOffset == paintingH - 1, rightOffset == 0, rightOffset == paintingW - 1);
+        bakedModels.add(this.models[index]);
+
+        for (var model : bakedModels) {
+            if (model == null) continue;
+            List<BakedQuad> quads = model.getQuads(null, side, rand);
+
+            for (BakedQuad q : quads) {
+                TextureAtlasSprite oldSprite = q.getSprite();
+                if (oldSprite.getName().equals(MissingTextureAtlasSprite.getLocation())) {
+                    int stride = DefaultVertexFormat.BLOCK.getIntegerSize();
+                    int[] v = Arrays.copyOf(q.getVertices(), q.getVertices().length);
+                    for (int i = 0; i < v.length / stride; i++) {
+                        float originalU = Float.intBitsToFloat(v[i * stride + 4]);
+                        float originalV = Float.intBitsToFloat(v[i * stride + 5]);
+
+                        float u1 = (originalU - oldSprite.getU0()) * segmentWScale + spriteRightOff;
+                        v[i * stride + 4] = Float.floatToRawIntBits(u1 + sprite.getU0());
+
+                        float v1 = (originalV - oldSprite.getV0()) * segmentHScale + spriteDownOff;
+                        v[i * stride + 5] = Float.floatToRawIntBits(v1 + sprite.getV0());
+                    }
+                    combinedQuads.add(new BakedQuad(v, q.getTintIndex(), q.getDirection(), sprite, q.isShade()));
+                } else combinedQuads.add(q);
+            }
         }
-        return newList;
+        return combinedQuads;
     }
 
 
@@ -96,7 +127,7 @@ public class PaintingBlockModel implements CustomBakedModel {
 
     @Override
     public TextureAtlasSprite getBlockParticle(ExtraModelData data) {
-        return paintingModel.getParticleIcon();
+        return models[0].getParticleIcon();
     }
 
 

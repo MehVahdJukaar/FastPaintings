@@ -9,7 +9,6 @@ import net.minecraft.server.TickTask;
 import net.minecraft.world.entity.decoration.HangingEntity;
 import net.minecraft.world.entity.decoration.Painting;
 import net.minecraft.world.entity.decoration.PaintingVariant;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.*;
@@ -60,7 +59,6 @@ public class PaintingBlock extends WaterBlock implements EntityBlock {
         }
         return super.getCollisionShape(state, level, pos, context);
     }
-
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {

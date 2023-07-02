@@ -1,6 +1,6 @@
 {
     "loader": "fastpaintings:painting",
-    "model": {
+    "center": {
 		"credit": "Made with Blockbench",
 		"elements": [
 			{
@@ -9,11 +9,11 @@
 				"color": 9,
 				"faces": {
 					"north": {"uv": [0, 0, 16, 16], "texture": "#back", "cullface": "north"},
-					"east": {"uv": [15, 0, 16, 16], "texture": "#missing", "cullface": "east"},
-					"south": {"uv": [0, 0, 16, 16], "texture": "#missing"},
-					"west": {"uv": [0, 0, 1, 16], "texture": "#missing", "cullface": "west"},
-					"up": {"uv": [0, 0, 16, 1], "texture": "#missing", "cullface": "up"},
-					"down": {"uv": [0, 15, 16, 16], "texture": "#missing", "cullface": "down"}
+					"east": {"uv": [15, 0, 16, 16], "texture": "#painting", "cullface": "east"},
+					"south": {"uv": [0, 0, 16, 16], "texture": "#painting"},
+					"west": {"uv": [0, 0, 1, 16], "texture": "#painting", "cullface": "west"},
+					"up": {"uv": [0, 0, 16, 1], "texture": "#painting", "cullface": "up"},
+					"down": {"uv": [0, 15, 16, 16], "texture": "#painting", "cullface": "down"}
 				}
 			}
 		],
@@ -22,5 +22,20 @@
 			"particle": "minecraft:painting/back",
 			"back": "minecraft:painting/back"
 		}
-	}
+	},
+	"top_bottom_left_right": {},
+	"top_bottom_left": {},
+	"top_bottom_right": {},
+	"top_bottom": {},
+	"top_left": {},
+	"top_right": {},
+	"top": {},
+	"bottom_left": {},
+	"bottom_right": {},
+	"bottom_right_left": {},
+	"bottom_right_top": {},
+	"bottom": {},
+	"left": {},
+	"right": {},
+	"right_left": {}
 }
