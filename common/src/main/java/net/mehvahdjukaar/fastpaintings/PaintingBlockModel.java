@@ -19,8 +19,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.decoration.PaintingVariant;
 import net.minecraft.world.level.BlockAndTintGetter;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
@@ -66,15 +64,15 @@ public class PaintingBlockModel implements CustomBakedModel {
         }
 
         PaintingTextureManager paintingTextureManager = Minecraft.getInstance().getPaintingTextures();
-        ResourceLocation paintingTexture = paintingTextureManager.get(variant).getName();
+        ResourceLocation paintingTexture = paintingTextureManager.get(variant).contents().name();
         TextureAtlasSprite sprite = Minecraft.getInstance().getTextureAtlas(TextureAtlas.LOCATION_BLOCKS)
-                .apply(paintingTexture);
+                .apply(new ResourceLocation(paintingTexture.getNamespace(), "painting/"+paintingTexture.getPath()));
 
-        float segmentWScale = sprite.getWidth() / (float) variant.getWidth();
-        float segmentHScale = sprite.getHeight() / (float) variant.getHeight();
+        float segmentWScale = sprite.contents().width() / (float) variant.getWidth();
+        float segmentHScale = sprite.contents().height() / (float) variant.getHeight();
 
-        int rightOffset = state.getValue(PaintingBlock.RIGHT_OFFSET);
-        int downOffset = state.getValue(PaintingBlock.DOWN_OFFSET);
+        int rightOffset = state.getValue(FastPaintingBlock.RIGHT_OFFSET);
+        int downOffset = state.getValue(FastPaintingBlock.DOWN_OFFSET);
         int paintingW = variant.getWidth() / 16;
         int paintingH = variant.getHeight() / 16;
 
@@ -95,7 +93,7 @@ public class PaintingBlockModel implements CustomBakedModel {
 
             for (BakedQuad q : quads) {
                 TextureAtlasSprite oldSprite = q.getSprite();
-                if (oldSprite.getName().equals(MissingTextureAtlasSprite.getLocation())) {
+                if (oldSprite.contents().name().equals(MissingTextureAtlasSprite.getLocation())) {
                     int stride = DefaultVertexFormat.BLOCK.getIntegerSize();
                     int[] v = Arrays.copyOf(q.getVertices(), q.getVertices().length);
                     for (int i = 0; i < v.length / stride; i++) {
@@ -118,8 +116,8 @@ public class PaintingBlockModel implements CustomBakedModel {
 
     @Override
     public ExtraModelData getModelData(@Nullable ExtraModelData originalTileData, BlockPos pos, BlockState state, BlockAndTintGetter level) {
-        if (state.getBlock() instanceof PaintingBlock && !PaintingBlock.isMaster(state)) {
-            var tile = PaintingBlock.getMaster(state, pos, level);
+        if (state.getBlock() instanceof FastPaintingBlock && !FastPaintingBlock.isMaster(state)) {
+            var tile = FastPaintingBlock.getMaster(state, pos, level);
             if (tile != null) return tile.getExtraModelData();
         }
         return originalTileData;

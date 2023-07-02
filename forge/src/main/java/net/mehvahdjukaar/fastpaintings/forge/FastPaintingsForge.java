@@ -3,7 +3,7 @@ package net.mehvahdjukaar.fastpaintings.forge;
 import net.mehvahdjukaar.fastpaintings.FastPaintings;
 import net.mehvahdjukaar.fastpaintings.FastPaintingsClient;
 import net.mehvahdjukaar.moonlight.api.client.model.forge.BakedQuadBuilderImpl;
-import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -19,7 +19,7 @@ public class FastPaintingsForge {
 
     public FastPaintingsForge() {
         FastPaintings.init();
-        if (PlatformHelper.getEnv().isClient()) {
+        if (PlatHelper.getPhysicalSide().isClient()) {
             FastPaintingsClient.init();
         }
 

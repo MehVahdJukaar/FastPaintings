@@ -1,6 +1,6 @@
 package net.mehvahdjukaar.fastpaintings.mixins;
 
-import net.mehvahdjukaar.fastpaintings.PaintingBlock;
+import net.mehvahdjukaar.fastpaintings.FastPaintingBlock;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.decoration.HangingEntity;
@@ -20,8 +20,8 @@ public abstract class HangingentityMixin extends Entity {
 
     @Inject(method = "tick", at = @At("RETURN"))
     public void tick(CallbackInfo ci){
-        if(this.tickCount < 3 && !level.isClientSide && this.isAlive() && this.getType() == EntityType.PAINTING){
-            PaintingBlock.tryConverting((Painting)(Object)this);
+        if(this.tickCount < 3 && !level().isClientSide && this.isAlive() && this.getType() == EntityType.PAINTING){
+            FastPaintingBlock.tryConverting((Painting)(Object)this);
         }
     }
 }

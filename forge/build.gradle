@@ -107,7 +107,7 @@ dependencies {
 
     modImplementation ("net.mehvahdjukaar:moonlight-forge:${rootProject.moonlight_version}")
 
-    modImplementation ("curse.maven:texture-dump-319039:3968958")
+ //   modImplementation ("curse.maven:texture-dump-319039:3968958")
 
     implementation 'org.jetbrains:annotations:22.0.0'
 }

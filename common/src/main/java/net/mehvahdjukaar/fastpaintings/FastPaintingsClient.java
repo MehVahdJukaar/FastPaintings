@@ -1,18 +1,18 @@
 package net.mehvahdjukaar.fastpaintings;
 
-import net.mehvahdjukaar.moonlight.api.platform.ClientPlatformHelper;
+import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 
 public class FastPaintingsClient {
 
     public static void init() {
-        ClientPlatformHelper.addClientSetup(FastPaintingsClient::setup);
-        ClientPlatformHelper.addModelLoaderRegistration(FastPaintingsClient::registerModelLoaders);
+        ClientHelper.addClientSetup(FastPaintingsClient::setup);
+        ClientHelper.addModelLoaderRegistration(FastPaintingsClient::registerModelLoaders);
     }
 
     public static void setup() {
     }
 
-    private static void registerModelLoaders(ClientPlatformHelper.ModelLoaderEvent event) {
+    private static void registerModelLoaders(ClientHelper.ModelLoaderEvent event) {
         event.register(FastPaintings.res("painting"), new PaintingBlockModelLoader());
     }
 

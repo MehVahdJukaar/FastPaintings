@@ -1,11 +1,10 @@
 package net.mehvahdjukaar.fastpaintings;
 
 import net.mehvahdjukaar.moonlight.api.block.WaterBlock;
-import net.mehvahdjukaar.moonlight.api.util.Utils;
+import net.mehvahdjukaar.moonlight.api.util.math.MthUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
-import net.minecraft.server.TickTask;
 import net.minecraft.world.entity.decoration.HangingEntity;
 import net.minecraft.world.entity.decoration.Painting;
 import net.minecraft.world.entity.decoration.PaintingVariant;
@@ -22,24 +21,23 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
-import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.EntityCollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
 
-public class PaintingBlock extends WaterBlock implements EntityBlock {
+public class FastPaintingBlock extends WaterBlock implements EntityBlock {
 
     protected static final VoxelShape SHAPE_NORTH = Block.box(0.0D, 0.0D, 15.0D, 16.0D, 16.0D, 16.0D);
-    protected static final VoxelShape SHAPE_SOUTH = Utils.rotateVoxelShape(SHAPE_NORTH, Direction.SOUTH);
-    protected static final VoxelShape SHAPE_EAST = Utils.rotateVoxelShape(SHAPE_NORTH, Direction.EAST);
-    protected static final VoxelShape SHAPE_WEST = Utils.rotateVoxelShape(SHAPE_NORTH, Direction.WEST);
+    protected static final VoxelShape SHAPE_SOUTH = MthUtils.rotateVoxelShape(SHAPE_NORTH, Direction.SOUTH);
+    protected static final VoxelShape SHAPE_EAST = MthUtils.rotateVoxelShape(SHAPE_NORTH, Direction.EAST);
+    protected static final VoxelShape SHAPE_WEST = MthUtils.rotateVoxelShape(SHAPE_NORTH, Direction.WEST);
     protected static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     protected static final IntegerProperty DOWN_OFFSET = IntegerProperty.create("y_offset", 0, 5);
     protected static final IntegerProperty RIGHT_OFFSET = IntegerProperty.create("x_offset", 0, 5);
 
-    public PaintingBlock(Properties properties) {
+    public FastPaintingBlock(Properties properties) {
         super(properties);
         this.registerDefaultState(this.defaultBlockState()
                 .setValue(DOWN_OFFSET, 0)
@@ -48,8 +46,8 @@ public class PaintingBlock extends WaterBlock implements EntityBlock {
     }
 
     @Override
-    public PushReaction getPistonPushReaction(BlockState state) {
-        return PushReaction.DESTROY;
+    public boolean isPossibleToRespawnInThis(BlockState blockState) {
+        return true;
     }
 
     @Override
@@ -80,7 +78,7 @@ public class PaintingBlock extends WaterBlock implements EntityBlock {
     public BlockState updateShape(BlockState stateIn, Direction updateDir, BlockState facingState, LevelAccessor worldIn, BlockPos currentPos, BlockPos facingPos) {
         Direction dir = stateIn.getValue(FACING);
         if (updateDir.getOpposite() == dir) {
-            if (!facingState.getMaterial().isSolid() && !DiodeBlock.isDiode(facingState)) {
+            if (!facingState.isSolid() && !DiodeBlock.isDiode(facingState)) {
                 return Blocks.AIR.defaultBlockState();
             }
         }
@@ -130,7 +128,7 @@ public class PaintingBlock extends WaterBlock implements EntityBlock {
                 for (int x = 0; x < width; x++) {
                     for (int y = 0; y < height; y++) {
                         BlockPos p = pos.below(y).relative(dir.getCounterClockWise(), x);
-                        if(level.getBlockState(p).is(this)) level.removeBlock(p, false);
+                        if (level.getBlockState(p).is(this)) level.removeBlock(p, false);
                     }
                 }
             } else level.removeBlock(pos, false);
@@ -158,7 +156,7 @@ public class PaintingBlock extends WaterBlock implements EntityBlock {
 
 
     public static void tryConverting(Painting entity) {
-        Level level = entity.level;
+        Level level = entity.level();
         Direction dir = entity.getDirection();
         var variant = entity.getVariant();
 
@@ -168,10 +166,10 @@ public class PaintingBlock extends WaterBlock implements EntityBlock {
         var bb = entity.getBoundingBox();
         //bad code ahead
         BlockPos pos = switch (dir) {
-            default -> new BlockPos(bb.maxX - 0.5, bb.maxY - 0.5, bb.minZ);
-            case SOUTH -> new BlockPos(bb.minX, bb.maxY - 0.5, bb.maxZ);
-            case WEST -> new BlockPos(bb.minX, bb.maxY - 0.5, bb.minZ);
-            case EAST -> new BlockPos(bb.maxX, bb.maxY - 0.5, bb.maxZ - 0.5);
+            default -> BlockPos.containing(bb.maxX - 0.5, bb.maxY - 0.5, bb.minZ);
+            case SOUTH -> BlockPos.containing(bb.minX, bb.maxY - 0.5, bb.maxZ);
+            case WEST -> BlockPos.containing(bb.minX, bb.maxY - 0.5, bb.minZ);
+            case EAST -> BlockPos.containing(bb.maxX, bb.maxY - 0.5, bb.maxZ - 0.5);
         };
 
 

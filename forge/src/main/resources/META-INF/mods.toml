@@ -29,13 +29,13 @@ itemIcon="minecraft:painting" #catalogue icon
 [[dependencies.fastpaintings]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.19,)"
+    versionRange="[1.20,)"
     ordering="NONE"
     side="BOTH"
 
 [[dependencies.fastpaintings]]
     modId="moonlight"
     mandatory=true
-    versionRange="[1.19-2.3.0,)"
+    versionRange="[1.20-2.5.16,)"
     ordering="NONE"
     side="BOTH"

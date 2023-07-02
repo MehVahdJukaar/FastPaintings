@@ -5,11 +5,13 @@ import net.mehvahdjukaar.moonlight.api.client.model.IExtraModelDataProvider;
 import net.mehvahdjukaar.moonlight.api.client.model.ModelDataKey;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.VariantHolder;
 import net.minecraft.world.entity.decoration.PaintingVariant;
 import net.minecraft.world.entity.decoration.PaintingVariants;
 import net.minecraft.world.item.Item;
@@ -19,7 +21,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 
 
-public class PaintingBlockEntity extends BlockEntity implements IExtraModelDataProvider { //implements VariantHolder<PaintingVariant>
+public class PaintingBlockEntity extends BlockEntity implements IExtraModelDataProvider, VariantHolder<Holder<PaintingVariant>> {
 
     public static final ModelDataKey<PaintingVariant> MIMIC_KEY = new ModelDataKey<>(PaintingVariant.class);
 
@@ -34,15 +36,16 @@ public class PaintingBlockEntity extends BlockEntity implements IExtraModelDataP
     @Override
     public void load(CompoundTag compound) {
         super.load(compound);
-        ResourceKey<PaintingVariant> resourceKey = ResourceKey.create(Registry.PAINTING_VARIANT_REGISTRY,
+        ResourceKey<PaintingVariant> resourceKey = ResourceKey.create(Registries.PAINTING_VARIANT,
                 ResourceLocation.tryParse(compound.getString("variant")));
-        this.setVariant(Registry.PAINTING_VARIANT.getHolder(resourceKey).orElseGet(PaintingBlockEntity::getDefaultVariant));
+        this.setVariant(BuiltInRegistries.PAINTING_VARIANT.getHolder(resourceKey)
+                .orElseGet(PaintingBlockEntity::getDefaultVariant));
 
     }
 
     @NotNull
-    private static Holder<PaintingVariant> getDefaultVariant() {
-        return Registry.PAINTING_VARIANT.getHolderOrThrow(PaintingVariants.KEBAB);
+    private static Holder.Reference<PaintingVariant> getDefaultVariant() {
+        return BuiltInRegistries.PAINTING_VARIANT.getHolderOrThrow(PaintingVariants.KEBAB);
     }
 
     @Override
