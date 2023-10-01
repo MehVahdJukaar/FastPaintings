@@ -19,8 +19,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.decoration.PaintingVariant;
 import net.minecraft.world.level.BlockAndTintGetter;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
@@ -114,6 +112,24 @@ public class PaintingBlockModel implements CustomBakedModel {
         }
         return combinedQuads;
     }
+    
+
+    /**
+     *
+     *         BakedModel itemModel = Minecraft.getInstance().getItemRenderer().getModel(Items.NETHER_STAR.getDefaultInstance(),
+     *                null, null, 0);
+     *         var p = new PoseStack();
+     *         itemModel.getTransforms().getTransform(ItemDisplayContext.GROUND).apply(false, p);
+     *
+     *         for(var q : itemModel.getQuads(null, side, rand)){
+     *             int[] v = Arrays.copyOf(q.getVertices(), q.getVertices().length);
+     *             transformVertices(v, p.last().pose());
+     *             combinedQuads.add(new BakedQuad(v, q.getTintIndex(), q.getDirection(), sprite, q.isShade()));
+     *         }
+     */
+
+
+
 
 
     @Override

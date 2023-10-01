@@ -36,6 +36,7 @@ dependencies {
         exclude module: "fabric-api"
     }
     modImplementation ("net.mehvahdjukaar:moonlight-fabric:${rootProject.moonlight_version}")
+    modImplementation ("curse.maven:paintings-252042:4653278")
 
 }
 

@@ -1,8 +1,14 @@
 package net.mehvahdjukaar.fastpaintings;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.minecraft.core.Direction;
+import net.mehvahdjukaar.moonlight.api.platform.network.ChannelHandler;
+import net.mehvahdjukaar.moonlight.api.platform.network.NetworkDir;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.level.block.Block;
@@ -13,6 +19,8 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.material.MaterialColor;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.function.Supplier;
 
 
@@ -20,14 +28,16 @@ public class FastPaintings {
     public static final String MOD_ID = "fastpaintings";
 
     public static ResourceLocation res(String name) {
-
         return new ResourceLocation(MOD_ID, name);
     }
 
-   public static SoundType PAINTING = new SoundType(1.0F, 1.0F,
-           SoundEvents.PAINTING_BREAK, SoundEvents.GRASS_STEP,
-           SoundEvents.PAINTING_PLACE, SoundEvents.WOOD_HIT,
-           SoundEvents.WOOD_FALL);
+    public static final ChannelHandler CHANNEL = ChannelHandler.createChannel(res("channel"));
+
+
+    public static SoundType PAINTING = new SoundType(1.0F, 1.0F,
+            SoundEvents.PAINTING_BREAK, SoundEvents.GRASS_STEP,
+            SoundEvents.PAINTING_PLACE, SoundEvents.WOOD_HIT,
+            SoundEvents.WOOD_FALL);
 
     public static final Supplier<Block> PAINTING_BLOCK = RegHelper.registerBlock(
             res("painting"),
@@ -45,5 +55,17 @@ public class FastPaintings {
     );
 
     public static void init() {
+        CHANNEL.register(NetworkDir.PLAY_TO_SERVER, SetPaintingMessage.class, SetPaintingMessage::new);
     }
+
+
+    public static final LoadingCache<Integer, BlockPos> LAST_KNOWN_ENTITY_POS = CacheBuilder.newBuilder()
+            .expireAfterAccess(Duration.of(5, ChronoUnit.MINUTES))
+            .build(new CacheLoader<>() {
+                @Override
+                public BlockPos load(Integer key) {
+                    return null;
+                }
+            });
+
 }
