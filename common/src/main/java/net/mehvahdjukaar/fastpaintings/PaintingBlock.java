@@ -149,6 +149,7 @@ public class PaintingBlock extends WaterBlock implements EntityBlock {
     }
 
 
+    @Override
     public ItemStack getCloneItemStack(BlockGetter level, BlockPos pos, BlockState state) {
         return Items.PAINTING.getDefaultInstance();
         //TODO: proper way with block item map
@@ -203,6 +204,8 @@ public class PaintingBlock extends WaterBlock implements EntityBlock {
                 pe.requestModelReload();
 
                 entity.discard();
+
+                FastPaintings.LAST_KNOWN_ENTITY_POS.put(entity.getId(), entity.getPos());
             }
         }
     }
@@ -213,6 +216,9 @@ public class PaintingBlock extends WaterBlock implements EntityBlock {
 
     public static PaintingBlockEntity getMaster(BlockState state, BlockPos pos, BlockAndTintGetter level) {
         BlockPos masterPos = getMasterPos(state, pos);
+        if (level instanceof Level l && !l.isLoaded(pos)) {
+            return null;
+        }
         var e = level.getBlockEntity(masterPos);
         if (e instanceof PaintingBlockEntity pe) return pe;
         return null;

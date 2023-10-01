@@ -1,23 +1,16 @@
 package net.mehvahdjukaar.fastpaintings;
 
 import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import net.mehvahdjukaar.moonlight.api.client.model.CustomBakedModel;
 import net.mehvahdjukaar.moonlight.api.client.model.CustomGeometry;
 import net.mehvahdjukaar.moonlight.api.client.model.CustomModelLoader;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.minecraft.client.renderer.block.model.BlockModel;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.Material;
-import net.minecraft.client.resources.model.ModelBaker;
-import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class PaintingBlockModelLoader implements CustomModelLoader {
@@ -44,15 +37,8 @@ public class PaintingBlockModelLoader implements CustomModelLoader {
                 "right_left"
         );
 
-        var map = l.stream().collect(Collectors.toMap(s -> s, json::get));
-        return new Geometry(map);
-    }
-
-
-    private record Geometry(Map<String, JsonElement> models) implements CustomGeometry {
-
-        @Override
-        public CustomBakedModel bake(ModelBaker modelBakery, Function<Material, TextureAtlasSprite> spriteGetter, ModelState transform, ResourceLocation location) {
+        var models = l.stream().collect(Collectors.toMap(s -> s, json::get));
+        return (modelBakery, spriteGetter, transform, location) -> {
             var map = models.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,
                     e -> {
                         var j = e.getValue();
@@ -66,6 +52,6 @@ public class PaintingBlockModelLoader implements CustomModelLoader {
                         return model.bake(modelBakery, model, spriteGetter, transform, location, true);
                     }));
             return new PaintingBlockModel(map);
-        }
+        };
     }
 }

@@ -1,9 +1,12 @@
 package net.mehvahdjukaar.fastpaintings;
 
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.mehvahdjukaar.moonlight.api.client.model.CustomBakedModel;
 import net.mehvahdjukaar.moonlight.api.client.model.ExtraModelData;
+import net.mehvahdjukaar.moonlight.api.client.util.VertexUtil;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
@@ -18,9 +21,13 @@ import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.decoration.PaintingVariant;
+import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
+import org.joml.Vector4f;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -82,6 +89,7 @@ public class PaintingBlockModel implements CustomBakedModel {
 
         List<BakedQuad> combinedQuads = new ArrayList<>();
 
+
         List<BakedModel> bakedModels = new ArrayList<>();
         bakedModels.add(this.models[0]);
         int index = getIndex(downOffset == 0, downOffset == paintingH - 1, rightOffset == 0, rightOffset == paintingW - 1);
@@ -112,6 +120,24 @@ public class PaintingBlockModel implements CustomBakedModel {
         }
         return combinedQuads;
     }
+    
+
+    /**
+     *
+     *         BakedModel itemModel = Minecraft.getInstance().getItemRenderer().getModel(Items.NETHER_STAR.getDefaultInstance(),
+     *                null, null, 0);
+     *         var p = new PoseStack();
+     *         itemModel.getTransforms().getTransform(ItemDisplayContext.GROUND).apply(false, p);
+     *
+     *         for(var q : itemModel.getQuads(null, side, rand)){
+     *             int[] v = Arrays.copyOf(q.getVertices(), q.getVertices().length);
+     *             transformVertices(v, p.last().pose());
+     *             combinedQuads.add(new BakedQuad(v, q.getTintIndex(), q.getDirection(), sprite, q.isShade()));
+     *         }
+     */
+
+
+
 
 
     @Override
