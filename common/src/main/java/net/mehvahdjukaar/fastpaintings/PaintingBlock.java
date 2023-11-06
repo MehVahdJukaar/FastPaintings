@@ -2,6 +2,7 @@ package net.mehvahdjukaar.fastpaintings;
 
 import net.mehvahdjukaar.moonlight.api.block.WaterBlock;
 import net.mehvahdjukaar.moonlight.api.util.math.MthUtils;
+import net.minecraft.client.resources.PaintingTextureManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
@@ -230,6 +231,11 @@ public class PaintingBlock extends WaterBlock implements EntityBlock {
         int x = state.getValue(RIGHT_OFFSET);
         Direction facing = state.getValue(FACING);
         return pos.above(y).relative(facing.getClockWise(), x);
+    }
+
+    //@Override
+    public boolean hidesNeighborFace(BlockGetter level, BlockPos pos, BlockState state, BlockState neighborState, Direction dir) {
+        return state.getValue(FACING).getOpposite() != dir;
     }
 
 }

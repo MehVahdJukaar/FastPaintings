@@ -7,6 +7,7 @@
     "HangingentityMixin"
   ],
   "client": [
+    "ModelManagerMixin",
     "PaintingPlusPlusCompatMixin",
     "PaintingRendererHackMixin"
   ],
