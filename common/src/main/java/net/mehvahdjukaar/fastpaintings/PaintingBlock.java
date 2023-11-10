@@ -12,10 +12,7 @@ import net.minecraft.world.entity.decoration.PaintingVariant;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.*;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.DiodeBlock;
-import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -233,9 +230,10 @@ public class PaintingBlock extends WaterBlock implements EntityBlock {
         return pos.above(y).relative(facing.getClockWise(), x);
     }
 
-    //@Override
-    public boolean hidesNeighborFace(BlockGetter level, BlockPos pos, BlockState state, BlockState neighborState, Direction dir) {
-        return state.getValue(FACING).getOpposite() != dir;
+    //so block behind is not culled in case painting is transparent
+    @Override
+    public boolean skipRendering(BlockState state, BlockState adjacentBlockState, Direction direction) {
+        if(adjacentBlockState.is(this) && adjacentBlockState.getValue(FACING) == state.getValue(FACING)) return true;
+        return state.getValue(FACING) == direction || super.skipRendering(state, adjacentBlockState, direction);
     }
-
 }

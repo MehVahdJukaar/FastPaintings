@@ -45,6 +45,7 @@ public class FastPaintings {
             () -> new PaintingBlock(BlockBehaviour.Properties.of()
                     .pushReaction(PushReaction.DESTROY)
                     .mapColor(MapColor.NONE)
+                    .noOcclusion()
                     .instabreak()
                     .sound(PAINTING))
 
