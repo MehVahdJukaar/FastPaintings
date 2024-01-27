@@ -1,19 +1,21 @@
 {
     "loader": "fastpaintings:painting",
-    "center": "fastpaintings:block/painting_model",
-	"top_bottom_left_right": {},
-	"top_bottom_left": {},
-	"top_bottom_right": {},
-	"top_bottom": {},
-	"top_left": {},
-	"top_right": {},
-	"top": {},
-	"bottom_left": {},
-	"bottom_right": {},
-	"bottom_right_left": {},
-	"bottom_right_top": {},
-	"bottom": {},
-	"left": {},
-	"right": {},
-	"right_left": {}
+	"models": {
+		"center": "fastpaintings:block/painting_model",
+		"top_bottom_left_right": {},
+		"top_bottom_left": {},
+		"top_bottom_right": {},
+		"top_bottom": {},
+		"top_left": {},
+		"top_right": {},
+		"top": {},
+		"bottom_left": {},
+		"bottom_right": {},
+		"bottom_right_left": {},
+		"bottom_right_top": {},
+		"bottom": {},
+		"left": {},
+		"right": {},
+		"right_left": {}
+	}
 }
