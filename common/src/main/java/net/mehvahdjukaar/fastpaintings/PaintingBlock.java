@@ -146,13 +146,11 @@ public class PaintingBlock extends WaterBlock implements EntityBlock {
         return isMaster(state) ? new PaintingBlockEntity(pos, state) : null;
     }
 
-
     @Override
-    public ItemStack getCloneItemStack(BlockGetter level, BlockPos pos, BlockState state) {
+    public ItemStack getCloneItemStack(LevelReader levelReader, BlockPos blockPos, BlockState blockState) {
         return Items.PAINTING.getDefaultInstance();
         //TODO: proper way with block item map
     }
-
 
     public static void tryConverting(Painting entity) {
         Level level = entity.level();

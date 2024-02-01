@@ -1,7 +1,8 @@
 architectury {
-    common(rootProject.enabled_platforms.split(","))
+    common(enabled_platforms.split(",")){
+        it.platformPackage("neoforge", "forge")
+    }
 }
-
 loom {
     accessWidenerPath = file("src/main/resources/fastpaintings.accesswidener")
 }
@@ -10,12 +11,11 @@ dependencies {
     // We depend on fabric loader here to use the fabric @Environment annotations and get the mixin dependencies
     // Do NOT use other classes from fabric loader
     modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
-    modImplementation ("net.mehvahdjukaar:moonlight:${rootProject.moonlight_version}")
     modImplementation ("curse.maven:paintings-252042:4653278")
 
-    implementation(annotationProcessor("io.github.llamalad7:mixinextras-common:${mixin_extras_version}"))
-    implementation("io.github.llamalad7:mixinextras-forge:${mixin_extras_version}")
     annotationProcessor 'net.fabricmc:sponge-mixin:0.12.5+mixin.0.8.5'
+
+    modImplementation ("net.mehvahdjukaar:moonlight:${moonlight_version}")
 }
 
 publishing {

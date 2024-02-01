@@ -1,31 +1,31 @@
 {
   "schemaVersion": 1,
-  "id": "fastpaintings",
-  "version": "${version}",
-  "name": "Fast Paintings",
-  "description": "Makes paintings way faster by turning them into blocks! Also allows customizing their model",
+  "id": "${mod_id}",
+  "version": "${mod_version}",
+  "name": "${mod_name}",
+  "description": "${mod_description}",
   "authors": [
-    "Mehvahdjukaar"
+    "${mod_authors}"
   ],
   "contact": {
-    "homepage": "https://www.curseforge.com/minecraft/mc-mods/fast-paintings"
+    "homepage": "${mod_homepage}",
+    "sources": "${mod_github}"
   },
-  "license": "ARR",
+  "license": "${mod_license}",
   "icon": "icon.png",
   "environment": "*",
   "entrypoints": {
-    "client": [
-    ],
     "main": [
       "net.mehvahdjukaar.fastpaintings.fabric.FastPaintingsFabric"
     ]
   },
   "mixins": [
-    "${mod_id}.mixins.json"
+    "${mod_id}.mixins.json",
+    "${mod_id}-common.mixins.json"
   ],
   "depends": {
     "fabric": "*",
-    "minecraft": ">=1.20",
-    "moonlight": ">=1.20-2.5.16"
+    "minecraft": ">=${minecraft_min_version} <${minecraft_max_version}",
+    "moonlight": "*"
   }
 }

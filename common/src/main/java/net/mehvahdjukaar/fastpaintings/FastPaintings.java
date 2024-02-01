@@ -32,7 +32,9 @@ public class FastPaintings {
         return new ResourceLocation(MOD_ID, name);
     }
 
-    public static final ChannelHandler CHANNEL = ChannelHandler.createChannel(res("channel"));
+    public static final ChannelHandler CHANNEL = ChannelHandler.builder(FastPaintings.MOD_ID)
+            .register(NetworkDir.PLAY_TO_SERVER, SetPaintingMessage.class, SetPaintingMessage::new)
+            .build();
 
 
     public static final SoundType PAINTING = new SoundType(1.0F, 1.0F,
@@ -58,7 +60,6 @@ public class FastPaintings {
     );
 
     public static void init() {
-        CHANNEL.register(NetworkDir.PLAY_TO_SERVER, SetPaintingMessage.class, SetPaintingMessage::new);
     }
 
 
