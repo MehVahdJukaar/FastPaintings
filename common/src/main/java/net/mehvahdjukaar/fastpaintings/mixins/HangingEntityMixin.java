@@ -6,16 +6,15 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.decoration.HangingEntity;
 import net.minecraft.world.entity.decoration.Painting;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(HangingEntity.class)
-public abstract class HangingentityMixin extends Entity {
+public abstract class HangingEntityMixin extends Entity {
 
-    protected HangingentityMixin(EntityType<?> entityType, Level level) {
+    protected HangingEntityMixin(EntityType<?> entityType, Level level) {
         super(entityType, level);
     }
 
