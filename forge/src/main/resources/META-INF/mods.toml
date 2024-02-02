@@ -1,6 +1,6 @@
 
 modLoader = "javafml"
-loaderVersion = "${loader_version_range}"
+loaderVersion = "*"
 
 license = "${mod_license}"
 issueTrackerURL = "${mod_github}/issues"
@@ -24,7 +24,7 @@ itemIcon="minecraft:painting" #catalogue icon
 [[dependencies.fastpaintings]]
 modId = "neoforge"
 type = "REQUIRED"
-versionRange = "${neo_version_range}"
+versionRange = "${forge_version_range}"
 ordering = "NONE"
 side = "BOTH"
 

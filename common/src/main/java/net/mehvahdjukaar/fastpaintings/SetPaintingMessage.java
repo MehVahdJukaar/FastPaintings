@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.fastpaintings;
 
-import net.mehvahdjukaar.moonlight.api.platform.network.ChannelHandler;
 import net.mehvahdjukaar.moonlight.api.platform.network.Message;
+import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
@@ -28,13 +28,13 @@ public class SetPaintingMessage implements Message {
     }
 
     @Override
-    public void writeToBuffer(FriendlyByteBuf buf) {
+    public void write(FriendlyByteBuf buf) {
         buf.writeResourceLocation(this.paintingName);
         buf.writeBlockPos(this.pos);
     }
 
     @Override
-    public void handle(ChannelHandler.Context context) {
+    public void handle(NetworkHelper.Context context) {
       var level =  context.getSender().level();
         BlockState state = level.getBlockState(pos);
         if(state.getBlock() instanceof PaintingBlock){

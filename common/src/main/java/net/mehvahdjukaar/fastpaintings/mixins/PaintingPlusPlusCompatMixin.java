@@ -2,6 +2,7 @@ package net.mehvahdjukaar.fastpaintings.mixins;
 
 import net.mehvahdjukaar.fastpaintings.FastPaintings;
 import net.mehvahdjukaar.fastpaintings.SetPaintingMessage;
+import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.asm.mixin.Mixin;
@@ -19,7 +20,7 @@ public class PaintingPlusPlusCompatMixin {
     public void sendFastPaintingsPacket(ResourceLocation variantName, int entityId, CallbackInfo ci){
        BlockPos pos = FastPaintings.LAST_KNOWN_ENTITY_POS.getIfPresent(entityId);
        if(pos != null){
-           FastPaintings.CHANNEL.sendToServer(new SetPaintingMessage(variantName, pos));
+           NetworkHelper.sendToServer(new SetPaintingMessage(variantName, pos));
            ci.cancel();
        }
     }
