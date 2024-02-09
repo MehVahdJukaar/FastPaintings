@@ -1,1 +1,1 @@
-updated neoforge
+added config to make painting drop with nbt
