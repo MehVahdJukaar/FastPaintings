@@ -14,7 +14,9 @@ import net.minecraft.world.entity.decoration.PaintingVariant;
 import net.minecraft.world.entity.decoration.PaintingVariants;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.ChestBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 
@@ -24,6 +26,7 @@ public class PaintingBlockEntity extends BlockEntity implements IExtraModelDataP
     public static final ModelDataKey<PaintingVariant> MIMIC_KEY = new ModelDataKey<>(PaintingVariant.class);
 
     private Holder<PaintingVariant> variant;
+    private boolean placedWithNbt = false;
 
     public PaintingBlockEntity(BlockPos blockPos, BlockState blockState) {
         super(FastPaintings.PAINTING_TILE.get(), blockPos, blockState);
@@ -37,7 +40,7 @@ public class PaintingBlockEntity extends BlockEntity implements IExtraModelDataP
         ResourceKey<PaintingVariant> resourceKey = ResourceKey.create(Registry.PAINTING_VARIANT_REGISTRY,
                 ResourceLocation.tryParse(compound.getString("variant")));
         this.setVariant(Registry.PAINTING_VARIANT.getHolder(resourceKey).orElseGet(PaintingBlockEntity::getDefaultVariant));
-
+        placedWithNbt = compound.getBoolean("placed_with_nbt");
     }
 
     @NotNull
@@ -49,11 +52,20 @@ public class PaintingBlockEntity extends BlockEntity implements IExtraModelDataP
     public void saveAdditional(CompoundTag tag) {
         super.saveAdditional(tag);
         tag.putString("variant", this.getVariant().unwrapKey().orElse(PaintingVariants.KEBAB).location().toString());
+        tag.putBoolean("placed_with_nbt", placedWithNbt);
     }
 
     public void setVariant(Holder<PaintingVariant> variant) {
         this.variant = variant;
         this.setChanged();
+    }
+
+    public void setPlacedWithNbt(boolean bool){
+        placedWithNbt = bool;
+    }
+
+    public boolean isPlacedWithNbt() {
+        return placedWithNbt;
     }
 
     public Holder<PaintingVariant> getVariant() {

@@ -1,1 +1,1 @@
-painting ++ integration
+added config to make painting drop with nbt

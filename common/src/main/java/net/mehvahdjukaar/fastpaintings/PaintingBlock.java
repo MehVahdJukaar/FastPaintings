@@ -1,11 +1,11 @@
 package net.mehvahdjukaar.fastpaintings;
 
 import net.mehvahdjukaar.moonlight.api.block.WaterBlock;
-import net.mehvahdjukaar.moonlight.api.util.Utils;
+import net.mehvahdjukaar.moonlight.api.util.math.MthUtils;
+import net.minecraft.client.resources.PaintingTextureManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
-import net.minecraft.server.TickTask;
 import net.minecraft.world.entity.decoration.HangingEntity;
 import net.minecraft.world.entity.decoration.Painting;
 import net.minecraft.world.entity.decoration.PaintingVariant;
@@ -22,12 +22,14 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
-import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.EntityCollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 public class PaintingBlock extends WaterBlock implements EntityBlock {
 
@@ -45,6 +47,31 @@ public class PaintingBlock extends WaterBlock implements EntityBlock {
                 .setValue(DOWN_OFFSET, 0)
                 .setValue(RIGHT_OFFSET, 0)
                 .setValue(FACING, Direction.NORTH));
+    }
+
+    @Override
+    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
+        DropMode mode = FastPaintings.SPECIAL_DROP.get();
+        if (mode != DropMode.OFF) {
+            if (isMaster(state)) {
+                PaintingBlockEntity m = getMaster(state, pos, level);
+                ItemStack itemStack = new ItemStack(Items.PAINTING);
+                if (m != null && (mode == DropMode.ALWAYS || m.isPlacedWithNbt())) {
+                    CompoundTag compoundTag = itemStack.getOrCreateTagElement("EntityTag");
+                    Painting.storeVariant(compoundTag, m.getVariant());
+                }
+                Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), itemStack);
+            }
+        }
+        super.onRemove(state, level, pos, newState, movedByPiston);
+    }
+
+    @Override
+    public List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
+        if (FastPaintings.SPECIAL_DROP.get() != DropMode.OFF) {
+            return List.of();
+        }
+        return super.getDrops(state, params);
     }
 
     @Override
@@ -89,7 +116,7 @@ public class PaintingBlock extends WaterBlock implements EntityBlock {
 
     @Override
     public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
-        var m = getMaster(state, pos, level);
+        PaintingBlockEntity m = getMaster(state, pos, level);
         if (m != null) {
             pos = m.getBlockPos();
             Direction dir = state.getValue(FACING);
@@ -158,7 +185,7 @@ public class PaintingBlock extends WaterBlock implements EntityBlock {
     }
 
 
-    public static void tryConverting(Painting entity) {
+    public static void tryConverting(Painting entity, @Nullable ItemStack stack) {
         Level level = entity.level;
         Direction dir = entity.getDirection();
         var variant = entity.getVariant();
@@ -191,6 +218,13 @@ public class PaintingBlock extends WaterBlock implements EntityBlock {
             if (level.getBlockEntity(pos) instanceof PaintingBlockEntity pe) {
                 pe.setVariant(variant);
 
+                if (stack != null && stack.hasTag()) {
+                    var tag = stack.getTagElement("EntityTag");
+                    var variant2 = Painting.loadVariant(tag);
+                    if (variant2.isPresent() && variant2.get().value() == variant.value()) {
+                        pe.setPlacedWithNbt(true);
+                    }
+                }
 
                 for (int x = 0; x < width; x++) {
                     for (int y = 0; y < height; y++) {
@@ -234,4 +268,10 @@ public class PaintingBlock extends WaterBlock implements EntityBlock {
         return pos.above(y).relative(facing.getClockWise(), x);
     }
 
+    //so block behind is not culled in case painting is transparent
+    @Override
+    public boolean skipRendering(BlockState state, BlockState adjacentBlockState, Direction direction) {
+        if (adjacentBlockState.is(this) && adjacentBlockState.getValue(FACING) == state.getValue(FACING)) return true;
+        return state.getValue(FACING) == direction || super.skipRendering(state, adjacentBlockState, direction);
+    }
 }

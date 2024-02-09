@@ -5,7 +5,6 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
-import net.minecraft.core.Direction;
 import net.mehvahdjukaar.moonlight.api.platform.network.ChannelHandler;
 import net.mehvahdjukaar.moonlight.api.platform.network.NetworkDir;
 import net.minecraft.core.BlockPos;
@@ -26,6 +25,8 @@ import java.util.function.Supplier;
 
 public class FastPaintings {
     public static final String MOD_ID = "fastpaintings";
+
+    public static Supplier<DropMode> SPECIAL_DROP;
 
     public static ResourceLocation res(String name) {
         return new ResourceLocation(MOD_ID, name);
@@ -56,6 +57,14 @@ public class FastPaintings {
 
     public static void init() {
         CHANNEL.register(NetworkDir.PLAY_TO_SERVER, SetPaintingMessage.class, SetPaintingMessage::new);
+
+        ConfigBuilder builder =  ConfigBuilder.create(MOD_ID, ConfigType.COMMON);
+        builder.push("general");
+        SPECIAL_DROP = builder.comment("Makes paintings always drop with their NBT")
+                        .define("nbt_drop", DropMode.WHEN_PLACED_WITH_NBT);
+        builder.pop();
+
+        builder.buildAndRegister();
     }
 
 
