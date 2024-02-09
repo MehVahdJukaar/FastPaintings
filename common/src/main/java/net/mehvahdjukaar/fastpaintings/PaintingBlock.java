@@ -185,14 +185,14 @@ public class PaintingBlock extends WaterBlock implements EntityBlock {
     }
 
 
-    public static void tryConverting(Painting entity, @Nullable ItemStack stack) {
+    public static boolean tryConverting(Painting entity, @Nullable ItemStack stack) {
         Level level = entity.level;
         Direction dir = entity.getDirection();
         var variant = entity.getVariant();
 
         int width = getWidth(variant);
         int height = getHeight(variant);
-        if (width > 5 || height > 5) return;
+        if (width > 5 || height > 5) return false;
         var bb = entity.getBoundingBox();
         //bad code ahead
         BlockPos pos = switch (dir) {
@@ -207,7 +207,7 @@ public class PaintingBlock extends WaterBlock implements EntityBlock {
             for (int y = 0; y < height; y++) {
                 BlockPos p = pos.below(y).relative(dir.getCounterClockWise(), x);
                 if (!level.getBlockState(p).isAir()) {
-                    return;
+                    return false;
                 }
             }
         }
@@ -242,8 +242,11 @@ public class PaintingBlock extends WaterBlock implements EntityBlock {
                 entity.discard();
 
                 FastPaintings.LAST_KNOWN_ENTITY_POS.put(entity.getId(), entity.getPos());
+
+                return true;
             }
         }
+        return false;
     }
 
     public static boolean isMaster(BlockState state) {
