@@ -61,7 +61,7 @@ public class FastPaintings {
         ConfigBuilder builder =  ConfigBuilder.create(MOD_ID, ConfigType.COMMON);
         builder.push("general");
         SPECIAL_DROP = builder.comment("Makes paintings always drop with their NBT")
-                        .define("nbt_drop", DropMode.WHEN_PLACED_WITH_NBT);
+                        .define("nbt_drop", DropMode.OFF);
         builder.pop();
 
         builder.buildAndRegister();
