@@ -1,1 +1,1 @@
-fixed some culling issues
+added config to make painting drop with nbt
