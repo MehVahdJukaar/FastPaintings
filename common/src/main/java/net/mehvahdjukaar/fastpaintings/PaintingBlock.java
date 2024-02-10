@@ -1,14 +1,19 @@
 package net.mehvahdjukaar.fastpaintings;
 
 import net.mehvahdjukaar.moonlight.api.block.WaterBlock;
-import net.mehvahdjukaar.moonlight.api.util.math.MthUtils;
-import net.minecraft.client.resources.PaintingTextureManager;
+import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.Containers;
 import net.minecraft.world.entity.decoration.HangingEntity;
 import net.minecraft.world.entity.decoration.Painting;
 import net.minecraft.world.entity.decoration.PaintingVariant;
+import net.minecraft.world.entity.decoration.PaintingVariants;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.*;
@@ -22,6 +27,8 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.material.PushReaction;
+import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.EntityCollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -30,6 +37,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Optional;
 
 public class PaintingBlock extends WaterBlock implements EntityBlock {
 
@@ -58,7 +66,7 @@ public class PaintingBlock extends WaterBlock implements EntityBlock {
                 ItemStack itemStack = new ItemStack(Items.PAINTING);
                 if (m != null && (mode == DropMode.ALWAYS || m.isPlacedWithNbt())) {
                     CompoundTag compoundTag = itemStack.getOrCreateTagElement("EntityTag");
-                    Painting.storeVariant(compoundTag, m.getVariant());
+                    compoundTag.putString("variant", (m.getVariant().unwrapKey().orElse(PaintingVariants.KEBAB)).location().toString());
                 }
                 Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), itemStack);
             }
@@ -67,11 +75,11 @@ public class PaintingBlock extends WaterBlock implements EntityBlock {
     }
 
     @Override
-    public List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
+    public List<ItemStack> getDrops(BlockState state, LootContext.Builder builder) {
         if (FastPaintings.SPECIAL_DROP.get() != DropMode.OFF) {
             return List.of();
         }
-        return super.getDrops(state, params);
+        return super.getDrops(state, builder);
     }
 
     @Override
@@ -157,7 +165,7 @@ public class PaintingBlock extends WaterBlock implements EntityBlock {
                 for (int x = 0; x < width; x++) {
                     for (int y = 0; y < height; y++) {
                         BlockPos p = pos.below(y).relative(dir.getCounterClockWise(), x);
-                        if(level.getBlockState(p).is(this)) level.removeBlock(p, false);
+                        if (level.getBlockState(p).is(this)) level.removeBlock(p, false);
                     }
                 }
             } else level.removeBlock(pos, false);
@@ -182,6 +190,13 @@ public class PaintingBlock extends WaterBlock implements EntityBlock {
     public ItemStack getCloneItemStack(BlockGetter level, BlockPos pos, BlockState state) {
         return Items.PAINTING.getDefaultInstance();
         //TODO: proper way with block item map
+    }
+
+    public static Optional<Holder<PaintingVariant>> loadVariant(CompoundTag compoundTag) {
+        Optional<ResourceKey<PaintingVariant>> opt = Optional.ofNullable(ResourceLocation.tryParse(
+                compoundTag.getString("variant"))).map((resourceLocation) ->
+                ResourceKey.create(Registry.PAINTING_VARIANT_REGISTRY, resourceLocation));
+        return opt.flatMap(Registry.PAINTING_VARIANT::getHolder);
     }
 
 
@@ -220,7 +235,7 @@ public class PaintingBlock extends WaterBlock implements EntityBlock {
 
                 if (stack != null && stack.hasTag()) {
                     var tag = stack.getTagElement("EntityTag");
-                    var variant2 = Painting.loadVariant(tag);
+                    var variant2 = loadVariant(tag);
                     if (variant2.isPresent() && variant2.get().value() == variant.value()) {
                         pe.setPlacedWithNbt(true);
                     }

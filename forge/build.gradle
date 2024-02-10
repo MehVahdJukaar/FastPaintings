@@ -109,5 +109,9 @@ dependencies {
 
     modImplementation ("curse.maven:texture-dump-319039:3968958")
 
+    implementation(annotationProcessor("io.github.llamalad7:mixinextras-common:${mixin_extras_version}"))
+    implementation(include("io.github.llamalad7:mixinextras-forge:${mixin_extras_version}"))
+    annotationProcessor 'net.fabricmc:sponge-mixin:0.12.5+mixin.0.8.5'
+
     implementation 'org.jetbrains:annotations:22.0.0'
 }
