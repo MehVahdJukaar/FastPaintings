@@ -240,8 +240,6 @@ public class PaintingBlock extends WaterBlock implements EntityBlock {
                 pe.requestModelReload();
 
                 entity.discard();
-
-                FastPaintings.LAST_KNOWN_ENTITY_POS.put(entity.getId(), entity.getPos());
                 return true;
             }
         }

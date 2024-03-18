@@ -8,8 +8,6 @@
     "PaintingItemMixin"
   ],
   "client": [
-    "ModelManagerMixin",
-    "PaintingPlusPlusCompatMixin",
     "PaintingRendererHackMixin"
   ],
   "injectors": {

@@ -121,25 +121,6 @@ public class PaintingBlockModel implements CustomBakedModel {
         }
         return combinedQuads;
     }
-    
-
-    /**
-     *
-     *         BakedModel itemModel = Minecraft.getInstance().getItemRenderer().getModel(Items.NETHER_STAR.getDefaultInstance(),
-     *                null, null, 0);
-     *         var p = new PoseStack();
-     *         itemModel.getTransforms().getTransform(ItemDisplayContext.GROUND).apply(false, p);
-     *
-     *         for(var q : itemModel.getQuads(null, side, rand)){
-     *             int[] v = Arrays.copyOf(q.getVertices(), q.getVertices().length);
-     *             transformVertices(v, p.last().pose());
-     *             combinedQuads.add(new BakedQuad(v, q.getTintIndex(), q.getDirection(), sprite, q.isShade()));
-     *         }
-     */
-
-
-
-
 
     @Override
     public ExtraModelData getModelData(@Nullable ExtraModelData originalTileData, BlockPos pos, BlockState state, BlockAndTintGetter level) {

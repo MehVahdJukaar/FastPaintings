@@ -59,8 +59,6 @@ public class FastPaintings {
     );
 
     public static void init() {
-        NetworkHelper.addRegistration(FastPaintings.MOD_ID, event -> event
-                .register(NetworkDir.SERVERBOUND, SetPaintingMessage.class, SetPaintingMessage::new));
 
         ConfigBuilder builder =  ConfigBuilder.create(MOD_ID, ConfigType.COMMON);
         builder.push("general");
@@ -71,15 +69,5 @@ public class FastPaintings {
         builder.buildAndRegister();
 
     }
-
-
-    public static final LoadingCache<Integer, BlockPos> LAST_KNOWN_ENTITY_POS = CacheBuilder.newBuilder()
-            .expireAfterAccess(Duration.of(5, ChronoUnit.MINUTES))
-            .build(new CacheLoader<>() {
-                @Override
-                public BlockPos load(Integer key) {
-                    return null;
-                }
-            });
 
 }
