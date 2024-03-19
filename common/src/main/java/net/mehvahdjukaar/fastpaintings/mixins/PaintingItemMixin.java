@@ -16,6 +16,7 @@ import org.spongepowered.asm.mixin.injection.At;
 @Mixin(HangingEntityItem.class)
 public class PaintingItemMixin {
 
+    //why not use events?
     @WrapOperation(method = "useOn", at = @At(target = "Lnet/minecraft/world/level/Level;addFreshEntity(Lnet/minecraft/world/entity/Entity;)Z",
             value = "INVOKE"))
     public boolean fastPaintings$convertImmediately(Level instance, Entity entity, Operation<Boolean> original,
