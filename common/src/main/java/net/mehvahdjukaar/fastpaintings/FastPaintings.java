@@ -36,9 +36,6 @@ public class FastPaintings {
         return new ResourceLocation(MOD_ID, name);
     }
 
-    public static final ChannelHandler CHANNEL = ChannelHandler.createChannel(res("channel"));
-
-
     public static final SoundType PAINTING = new SoundType(1.0F, 1.0F,
             SoundEvents.PAINTING_BREAK, SoundEvents.GRASS_STEP,
             SoundEvents.PAINTING_PLACE, SoundEvents.WOOD_HIT,
@@ -62,7 +59,6 @@ public class FastPaintings {
     );
 
     public static void init() {
-        CHANNEL.register(NetworkDir.PLAY_TO_SERVER, SetPaintingMessage.class, SetPaintingMessage::new);
 
         ConfigBuilder builder =  ConfigBuilder.create(MOD_ID, ConfigType.COMMON);
         builder.push("general");
@@ -73,14 +69,5 @@ public class FastPaintings {
         builder.buildAndRegister();
     }
 
-
-    public static final LoadingCache<Integer, BlockPos> LAST_KNOWN_ENTITY_POS = CacheBuilder.newBuilder()
-            .expireAfterAccess(Duration.of(5, ChronoUnit.MINUTES))
-            .build(new CacheLoader<>() {
-                @Override
-                public BlockPos load(Integer key) {
-                    return null;
-                }
-            });
 
 }

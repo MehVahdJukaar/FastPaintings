@@ -1,1 +1,1 @@
-added config to make painting drop with nbt
+removed painting++ integration as its not needed anymore

@@ -105,9 +105,9 @@ dependencies {
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
 
-    modImplementation ("net.mehvahdjukaar:moonlight-forge:${rootProject.moonlight_version}")
+    modImplementation ("net.mehvahdjukaar:moonlight-forge:${moonlight_version}")
 
- //   modImplementation ("curse.maven:texture-dump-319039:3968958")
+    modImplementation ("curse.maven:paintings-252042:5196035")
 
     implementation 'org.jetbrains:annotations:22.0.0'
 

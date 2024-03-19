@@ -243,9 +243,7 @@ public class PaintingBlock extends WaterBlock implements EntityBlock {
 
                 entity.discard();
 
-                FastPaintings.LAST_KNOWN_ENTITY_POS.put(entity.getId(), entity.getPos());
-
-                return true;
+                    return true;
             }
         }
         return false;
