@@ -6,7 +6,7 @@ import net.minecraft.resources.ResourceLocation;
 
 public class FastPaintingsClient {
 
-    public static final ResourceLocation PAINTING_SHEET = new ResourceLocation("paintings");
+    public static final ResourceLocation PAINTING_SHEET = ResourceLocation.withDefaultNamespace("paintings");
 
     public static void init() {
         ClientHelper.addClientSetup(FastPaintingsClient::setup);

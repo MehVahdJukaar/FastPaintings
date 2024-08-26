@@ -5,13 +5,16 @@ import net.mehvahdjukaar.moonlight.api.util.math.MthUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.world.Containers;
 import net.minecraft.world.entity.decoration.HangingEntity;
 import net.minecraft.world.entity.decoration.Painting;
 import net.minecraft.world.entity.decoration.PaintingVariant;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.*;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -59,8 +62,14 @@ public class PaintingBlock extends WaterBlock implements EntityBlock {
                 PaintingBlockEntity m = getMaster(state, pos, level);
                 ItemStack itemStack = new ItemStack(Items.PAINTING);
                 if (m != null && (mode == DropMode.ALWAYS || m.isPlacedWithNbt())) {
-                    CompoundTag compoundTag = itemStack.getOrCreateTagElement("EntityTag");
-                    Painting.storeVariant(compoundTag, m.getVariant());
+                    CompoundTag compoundTag = new CompoundTag();
+
+                    Painting.VARIANT_CODEC.encodeStart(level.registryAccess()
+                            .createSerializationContext(NbtOps.INSTANCE), m.getVariant()).ifSuccess((tag) -> {
+                        compoundTag.merge((CompoundTag) tag);
+                    });
+                    itemStack.set(DataComponents.ENTITY_DATA, CustomData.of(compoundTag));
+
                 }
                 Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), itemStack);
             }
@@ -167,11 +176,11 @@ public class PaintingBlock extends WaterBlock implements EntityBlock {
     }
 
     private static int getHeight(Holder<PaintingVariant> variant) {
-        return variant.value().getHeight() / 16;
+        return variant.value().height() / 16;
     }
 
     private static int getWidth(Holder<PaintingVariant> variant) {
-        return variant.value().getWidth() / 16;
+        return variant.value().width() / 16;
     }
 
     @Override
@@ -181,7 +190,7 @@ public class PaintingBlock extends WaterBlock implements EntityBlock {
 
 
     @Override
-    public ItemStack getCloneItemStack(BlockGetter level, BlockPos pos, BlockState state) {
+    public ItemStack getCloneItemStack(LevelReader level, BlockPos pos, BlockState state) {
         return Items.PAINTING.getDefaultInstance();
         //TODO: proper way with block item map
     }
@@ -198,10 +207,10 @@ public class PaintingBlock extends WaterBlock implements EntityBlock {
         var bb = entity.getBoundingBox();
         //bad code ahead
         BlockPos pos = switch (dir) {
-            default -> BlockPos.containing(bb.maxX - 0.5, bb.maxY - 0.5, bb.minZ);
             case SOUTH -> BlockPos.containing(bb.minX, bb.maxY - 0.5, bb.maxZ);
             case WEST -> BlockPos.containing(bb.minX, bb.maxY - 0.5, bb.minZ);
             case EAST -> BlockPos.containing(bb.maxX, bb.maxY - 0.5, bb.maxZ - 0.5);
+            default -> BlockPos.containing(bb.maxX - 0.5, bb.maxY - 0.5, bb.minZ);
         };
 
 
@@ -220,11 +229,14 @@ public class PaintingBlock extends WaterBlock implements EntityBlock {
             if (level.getBlockEntity(pos) instanceof PaintingBlockEntity pe) {
                 pe.setVariant(variant);
 
-                if (stack != null && stack.hasTag()) {
-                    var tag = stack.getTagElement("EntityTag");
-                    var variant2 = Painting.loadVariant(tag);
-                    if (variant2.isPresent() && variant2.get().value() == variant.value()) {
-                        pe.setPlacedWithNbt(true);
+                if (stack != null) {
+                    var tag = stack.get(DataComponents.ENTITY_DATA);
+                    if (tag != null) {
+                        var variant2 = Painting.VARIANT_CODEC.parse(level.registryAccess()
+                                .createSerializationContext(NbtOps.INSTANCE), tag.copyTag());
+                        if (variant2.isSuccess() && variant2.getOrThrow().value() == variant.value()) {
+                            pe.setPlacedWithNbt(true);
+                        }
                     }
                 }
 
@@ -243,7 +255,7 @@ public class PaintingBlock extends WaterBlock implements EntityBlock {
 
                 entity.discard();
 
-                    return true;
+                return true;
             }
         }
         return false;

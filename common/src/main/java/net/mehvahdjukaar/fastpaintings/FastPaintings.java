@@ -1,15 +1,10 @@
 package net.mehvahdjukaar.fastpaintings;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
-import net.mehvahdjukaar.moonlight.api.platform.network.ChannelHandler;
-import net.mehvahdjukaar.moonlight.api.platform.network.NetworkDir;
-import net.minecraft.core.BlockPos;
+import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.level.block.Block;
@@ -21,8 +16,6 @@ import net.minecraft.world.level.material.PushReaction;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.util.function.Supplier;
 
 
@@ -30,10 +23,11 @@ public class FastPaintings {
     public static final String MOD_ID = "fastpaintings";
     public static final Logger LOGGER = LogManager.getLogger("Fast Paintings");
 
-    public static Supplier<DropMode> SPECIAL_DROP;
+    public static final Supplier<DropMode> SPECIAL_DROP;
+    public static final ModConfigHolder CONFIG;
 
     public static ResourceLocation res(String name) {
-        return new ResourceLocation(MOD_ID, name);
+        return ResourceLocation.fromNamespaceAndPath(MOD_ID, name);
     }
 
     public static final SoundType PAINTING = new SoundType(1.0F, 1.0F,
@@ -58,16 +52,19 @@ public class FastPaintings {
             () -> PlatHelper.newBlockEntityType(PaintingBlockEntity::new, PAINTING_BLOCK.get())
     );
 
-    public static void init() {
 
-        ConfigBuilder builder =  ConfigBuilder.create(MOD_ID, ConfigType.COMMON);
+    static {
+        ConfigBuilder builder = ConfigBuilder.create(MOD_ID, ConfigType.COMMON);
         builder.push("general");
         SPECIAL_DROP = builder.comment("Makes paintings always drop with their NBT")
-                        .define("nbt_drop", DropMode.OFF);
+                .define("nbt_drop", DropMode.OFF);
         builder.pop();
 
-        builder.buildAndRegister();
+        CONFIG = builder.build();
     }
 
 
+    public static void init() {
+
+    }
 }

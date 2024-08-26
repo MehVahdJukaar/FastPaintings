@@ -139,6 +139,11 @@ allprojects {
         }
 
         maven {
+            name = "TerraformersMC"
+            url = "https://maven.terraformersmc.com/releases"
+        }
+
+        maven {
             url "https://maven.firstdarkdev.xyz/snapshots"
         }
 

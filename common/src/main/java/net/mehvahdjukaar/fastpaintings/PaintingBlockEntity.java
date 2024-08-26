@@ -3,9 +3,10 @@ package net.mehvahdjukaar.fastpaintings;
 import net.mehvahdjukaar.moonlight.api.client.model.ExtraModelData;
 import net.mehvahdjukaar.moonlight.api.client.model.IExtraModelDataProvider;
 import net.mehvahdjukaar.moonlight.api.client.model.ModelDataKey;
+import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -16,11 +17,10 @@ import net.minecraft.world.entity.decoration.PaintingVariant;
 import net.minecraft.world.entity.decoration.PaintingVariants;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.block.ChestBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 
 public class PaintingBlockEntity extends BlockEntity implements IExtraModelDataProvider, VariantHolder<Holder<PaintingVariant>> {
@@ -32,28 +32,29 @@ public class PaintingBlockEntity extends BlockEntity implements IExtraModelDataP
 
     public PaintingBlockEntity(BlockPos blockPos, BlockState blockState) {
         super(FastPaintings.PAINTING_TILE.get(), blockPos, blockState);
-        this.variant = getDefaultVariant();
+        this.variant = getDefaultVariant(Utils.hackyGetRegistryAccess().registryOrThrow(Registries.PAINTING_VARIANT).asLookup());
         Item.BY_BLOCK.put(FastPaintings.PAINTING_BLOCK.get(), Items.PAINTING);
     }
 
     @Override
-    public void load(CompoundTag compound) {
-        super.load(compound);
+    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.loadAdditional(tag, registries);
         ResourceKey<PaintingVariant> resourceKey = ResourceKey.create(Registries.PAINTING_VARIANT,
-                ResourceLocation.tryParse(compound.getString("variant")));
-        this.setVariant(BuiltInRegistries.PAINTING_VARIANT.getHolder(resourceKey)
-                .orElseGet(PaintingBlockEntity::getDefaultVariant));
-        placedWithNbt = compound.getBoolean("placed_with_nbt");
+                ResourceLocation.tryParse(tag.getString("variant")));
+        var paintingsReg = registries.lookupOrThrow(Registries.PAINTING_VARIANT);
+        this.setVariant(paintingsReg.get(resourceKey)
+                .orElseGet(() -> getDefaultVariant(paintingsReg)));
+        placedWithNbt = tag.getBoolean("placed_with_nbt");
     }
 
     @NotNull
-    private static Holder.Reference<PaintingVariant> getDefaultVariant() {
-        return BuiltInRegistries.PAINTING_VARIANT.getHolderOrThrow(PaintingVariants.KEBAB);
+    private static Holder.Reference<PaintingVariant> getDefaultVariant(HolderLookup.RegistryLookup<PaintingVariant> reg) {
+        return reg.getOrThrow(PaintingVariants.KEBAB);
     }
 
     @Override
-    public void saveAdditional(CompoundTag tag) {
-        super.saveAdditional(tag);
+    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.saveAdditional(tag, registries);
         tag.putString("variant", this.getVariant().unwrapKey().orElse(PaintingVariants.KEBAB).location().toString());
         tag.putBoolean("placed_with_nbt", placedWithNbt);
     }
@@ -63,7 +64,7 @@ public class PaintingBlockEntity extends BlockEntity implements IExtraModelDataP
         this.setChanged();
     }
 
-    public void setPlacedWithNbt(boolean bool){
+    public void setPlacedWithNbt(boolean bool) {
         placedWithNbt = bool;
     }
 
@@ -80,16 +81,14 @@ public class PaintingBlockEntity extends BlockEntity implements IExtraModelDataP
         return ClientboundBlockEntityDataPacket.create(this);
     }
 
+
     @Override
-    public CompoundTag getUpdateTag() {
-        return this.saveWithoutMetadata();
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        return this.saveWithoutMetadata(registries);
     }
 
     @Override
-    public ExtraModelData getExtraModelData() {
-        return ExtraModelData.builder()
-                .with(MIMIC_KEY, this.getVariant().value())
-                .build();
+    public void addExtraModelData(ExtraModelData.Builder builder) {
+        builder.with(MIMIC_KEY, this.getVariant().value());
     }
-
 }
