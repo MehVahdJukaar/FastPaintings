@@ -108,6 +108,7 @@ dependencies {
     modImplementation ("net.mehvahdjukaar:moonlight-forge:${moonlight_version}")
 
     modImplementation ("curse.maven:paintings-252042:5196035")
+    modImplementation ("curse.maven:embeddium-908741:5307642")
 
     implementation 'org.jetbrains:annotations:22.0.0'
 

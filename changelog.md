@@ -1,1 +1,1 @@
-removed painting++ integration as its not needed anymore
+reverted latest changes. sorry bout that
