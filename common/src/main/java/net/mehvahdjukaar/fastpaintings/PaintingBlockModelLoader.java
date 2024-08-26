@@ -23,7 +23,7 @@ public class PaintingBlockModelLoader implements CustomModelLoader {
         if (jsonModels instanceof JsonObject j) {
             modelsMap.putAll(j.asMap());
         }
-        return (modelBakery, spriteGetter, transform, location) -> {
+        return (modelBakery, spriteGetter, transform) -> {
             var map = modelsMap.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,
                     e -> {
                         var j = e.getValue();
@@ -34,7 +34,7 @@ public class PaintingBlockModelLoader implements CustomModelLoader {
                             model = ClientHelper.parseBlockModel(j);
                         }
                         model.resolveParents(modelBakery::getModel);
-                        return model.bake(modelBakery, model, spriteGetter, transform, location, true);
+                        return model.bake(modelBakery, model, spriteGetter, transform, true);
                     }));
             return new PaintingBlockModel(map);
         };

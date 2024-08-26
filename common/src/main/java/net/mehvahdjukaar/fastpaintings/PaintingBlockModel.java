@@ -1,12 +1,9 @@
 package net.mehvahdjukaar.fastpaintings;
 
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.PoseStack;
+import net.mehvahdjukaar.moonlight.api.client.model.BakedQuadsTransformer;
 import net.mehvahdjukaar.moonlight.api.client.model.CustomBakedModel;
 import net.mehvahdjukaar.moonlight.api.client.model.ExtraModelData;
-import net.mehvahdjukaar.moonlight.api.client.util.VertexUtil;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
@@ -20,24 +17,18 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.entity.ai.village.poi.PoiTypes;
 import net.minecraft.world.entity.decoration.PaintingVariant;
-import net.minecraft.world.item.ItemDisplayContext;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix4f;
-import org.joml.Vector4f;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 public class PaintingBlockModel implements CustomBakedModel {
 
-    public static final ResourceLocation BACK_TEXTURE = new ResourceLocation("painting/back");
+    public static final ResourceLocation BACK_TEXTURE = ResourceLocation.withDefaultNamespace("painting/back");
 
     private final BakedModel[] models = new BakedModel[16];
 
@@ -74,15 +65,15 @@ public class PaintingBlockModel implements CustomBakedModel {
         PaintingTextureManager paintingTextureManager = Minecraft.getInstance().getPaintingTextures();
         ResourceLocation paintingTexture = paintingTextureManager.get(variant).contents().name();
         TextureAtlasSprite sprite = Minecraft.getInstance().getTextureAtlas(TextureAtlas.LOCATION_BLOCKS)
-                .apply(new ResourceLocation(paintingTexture.getNamespace(), "painting/"+paintingTexture.getPath()));
+                .apply(ResourceLocation.fromNamespaceAndPath(paintingTexture.getNamespace(), "painting/" + paintingTexture.getPath()));
 
-        float segmentWScale = sprite.contents().width() / (float) variant.getWidth();
-        float segmentHScale = sprite.contents().height() / (float) variant.getHeight();
+        float segmentWScale = sprite.contents().width() / (float) variant.width();
+        float segmentHScale = sprite.contents().height() / (float) variant.height();
 
         int rightOffset = state.getValue(PaintingBlock.RIGHT_OFFSET);
         int downOffset = state.getValue(PaintingBlock.DOWN_OFFSET);
-        int paintingW = variant.getWidth() / 16;
-        int paintingH = variant.getHeight() / 16;
+        int paintingW = variant.width() / 16;
+        int paintingH = variant.height() / 16;
 
         float spriteRightOff = rightOffset * (sprite.getU1() - sprite.getU0()) / paintingW;
         float spriteDownOff = downOffset * (sprite.getV1() - sprite.getV0()) / paintingH;
@@ -99,46 +90,31 @@ public class PaintingBlockModel implements CustomBakedModel {
         for (var model : bakedModels) {
             if (model == null) continue;
             List<BakedQuad> quads = model.getQuads(null, side, rand);
-
+            BakedQuadsTransformer transformer = BakedQuadsTransformer.create()
+                    .applyingSprite(sprite);
             for (BakedQuad q : quads) {
                 TextureAtlasSprite oldSprite = q.getSprite();
                 if (oldSprite.contents().name().equals(MissingTextureAtlasSprite.getLocation())) {
-                    int stride = DefaultVertexFormat.BLOCK.getIntegerSize();
-                    int[] v = Arrays.copyOf(q.getVertices(), q.getVertices().length);
-                    for (int i = 0; i < v.length / stride; i++) {
-                        float originalU = Float.intBitsToFloat(v[i * stride + 4]);
-                        float originalV = Float.intBitsToFloat(v[i * stride + 5]);
-
-                        float u1 = (originalU - oldSprite.getU0()) * segmentWScale + spriteRightOff;
-                        v[i * stride + 4] = Float.floatToRawIntBits(u1 + sprite.getU0());
-
-                        float v1 = (originalV - oldSprite.getV0()) * segmentHScale + spriteDownOff;
-                        v[i * stride + 5] = Float.floatToRawIntBits(v1 + sprite.getV0());
-                    }
-                    combinedQuads.add(new BakedQuad(v, q.getTintIndex(), q.getDirection(), sprite, q.isShade()));
+                    combinedQuads.add(transformer.transform(q));
                 } else combinedQuads.add(q);
             }
         }
         return combinedQuads;
     }
-    
+
 
     /**
-     *
-     *         BakedModel itemModel = Minecraft.getInstance().getItemRenderer().getModel(Items.NETHER_STAR.getDefaultInstance(),
-     *                null, null, 0);
-     *         var p = new PoseStack();
-     *         itemModel.getTransforms().getTransform(ItemDisplayContext.GROUND).apply(false, p);
-     *
-     *         for(var q : itemModel.getQuads(null, side, rand)){
-     *             int[] v = Arrays.copyOf(q.getVertices(), q.getVertices().length);
-     *             transformVertices(v, p.last().pose());
-     *             combinedQuads.add(new BakedQuad(v, q.getTintIndex(), q.getDirection(), sprite, q.isShade()));
-     *         }
+     * BakedModel itemModel = Minecraft.getInstance().getItemRenderer().getModel(Items.NETHER_STAR.getDefaultInstance(),
+     * null, null, 0);
+     * var p = new PoseStack();
+     * itemModel.getTransforms().getTransform(ItemDisplayContext.GROUND).apply(false, p);
+     * <p>
+     * for(var q : itemModel.getQuads(null, side, rand)){
+     * int[] v = Arrays.copyOf(q.getVertices(), q.getVertices().length);
+     * transformVertices(v, p.last().pose());
+     * combinedQuads.add(new BakedQuad(v, q.getTintIndex(), q.getDirection(), sprite, q.isShade()));
+     * }
      */
-
-
-
 
 
     @Override

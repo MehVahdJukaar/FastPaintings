@@ -38,7 +38,7 @@ itemIcon="minecraft:painting" #catalogue icon
 [[dependencies.fastpaintings]]
     modId="moonlight"
     mandatory=true
-    versionRange="[,)"
+    versionRange="*"
     ordering="NONE"
     side="BOTH"
 
