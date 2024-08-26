@@ -61,7 +61,7 @@ subprojects {
 
     if (env.MODRINTH_TOKEN) {
         modrinth {
-            projectId = rootProject.mod_id
+            projectId = "fast-paintings"
             uploadFile = tasks.remapJar
             additionalFiles.add(tasks.remapSourcesJar)
             gameVersions = versions
