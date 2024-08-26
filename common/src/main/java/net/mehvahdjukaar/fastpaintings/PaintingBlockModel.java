@@ -1,6 +1,6 @@
 package net.mehvahdjukaar.fastpaintings;
 
-import net.mehvahdjukaar.moonlight.api.client.model.BakedQuadsTransformer;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import net.mehvahdjukaar.moonlight.api.client.model.CustomBakedModel;
 import net.mehvahdjukaar.moonlight.api.client.model.ExtraModelData;
 import net.minecraft.client.Minecraft;
@@ -23,6 +23,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -67,13 +68,14 @@ public class PaintingBlockModel implements CustomBakedModel {
         TextureAtlasSprite sprite = Minecraft.getInstance().getTextureAtlas(TextureAtlas.LOCATION_BLOCKS)
                 .apply(ResourceLocation.fromNamespaceAndPath(paintingTexture.getNamespace(), "painting/" + paintingTexture.getPath()));
 
-        float segmentWScale = sprite.contents().width() / (float) variant.width();
-        float segmentHScale = sprite.contents().height() / (float) variant.height();
+        int paintingW = variant.width();
+        int paintingH = variant.height();
+        float segmentWScale = sprite.contents().width() / (float) (paintingW * 16);
+        float segmentHScale = sprite.contents().height() / (float) (paintingH * 16);
 
         int rightOffset = state.getValue(PaintingBlock.RIGHT_OFFSET);
         int downOffset = state.getValue(PaintingBlock.DOWN_OFFSET);
-        int paintingW = variant.width() / 16;
-        int paintingH = variant.height() / 16;
+
 
         float spriteRightOff = rightOffset * (sprite.getU1() - sprite.getU0()) / paintingW;
         float spriteDownOff = downOffset * (sprite.getV1() - sprite.getV0()) / paintingH;
@@ -90,12 +92,23 @@ public class PaintingBlockModel implements CustomBakedModel {
         for (var model : bakedModels) {
             if (model == null) continue;
             List<BakedQuad> quads = model.getQuads(null, side, rand);
-            BakedQuadsTransformer transformer = BakedQuadsTransformer.create()
-                    .applyingSprite(sprite);
             for (BakedQuad q : quads) {
                 TextureAtlasSprite oldSprite = q.getSprite();
                 if (oldSprite.contents().name().equals(MissingTextureAtlasSprite.getLocation())) {
-                    combinedQuads.add(transformer.transform(q));
+                    int stride = DefaultVertexFormat.BLOCK.getVertexSize() / 4;
+                    stride = 8;
+                    int[] v = Arrays.copyOf(q.getVertices(), q.getVertices().length);
+                    for (int i = 0; i < v.length / stride; i++) {
+                        float originalU = Float.intBitsToFloat(v[i * stride + 4]);
+                        float originalV = Float.intBitsToFloat(v[i * stride + 5]);
+
+                        float u1 = (originalU - oldSprite.getU0()) * segmentWScale + spriteRightOff;
+                        v[i * stride + 4] = Float.floatToRawIntBits(u1 + sprite.getU0());
+
+                        float v1 = (originalV - oldSprite.getV0()) * segmentHScale + spriteDownOff;
+                        v[i * stride + 5] = Float.floatToRawIntBits(v1 + sprite.getV0());
+                    }
+                    combinedQuads.add(new BakedQuad(v, q.getTintIndex(), q.getDirection(), sprite, q.isShade()));
                 } else combinedQuads.add(q);
             }
         }

@@ -176,11 +176,11 @@ public class PaintingBlock extends WaterBlock implements EntityBlock {
     }
 
     private static int getHeight(Holder<PaintingVariant> variant) {
-        return variant.value().height() / 16;
+        return variant.value().height();
     }
 
     private static int getWidth(Holder<PaintingVariant> variant) {
-        return variant.value().width() / 16;
+        return variant.value().width();
     }
 
     @Override
