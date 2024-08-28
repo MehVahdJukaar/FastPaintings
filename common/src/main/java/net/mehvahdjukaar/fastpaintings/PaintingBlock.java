@@ -12,6 +12,7 @@ import net.minecraft.world.Containers;
 import net.minecraft.world.entity.decoration.HangingEntity;
 import net.minecraft.world.entity.decoration.Painting;
 import net.minecraft.world.entity.decoration.PaintingVariant;
+import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.CustomData;
@@ -68,6 +69,8 @@ public class PaintingBlock extends WaterBlock implements EntityBlock {
                             .createSerializationContext(NbtOps.INSTANCE), m.getVariant()).ifSuccess((tag) -> {
                         compoundTag.merge((CompoundTag) tag);
                     });
+                    compoundTag.putString("id", "minecraft:painting");
+
                     itemStack.set(DataComponents.ENTITY_DATA, CustomData.of(compoundTag));
 
                 }

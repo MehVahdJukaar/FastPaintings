@@ -1,1 +1,1 @@
-fixed fabric not working ok
+fixed painting drop mode not working properly
