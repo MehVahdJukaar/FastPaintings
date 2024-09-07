@@ -1,1 +1,2 @@
-fixed painting drop mode not working properly
+fixed an issue
+added painting to carryon blacklist
