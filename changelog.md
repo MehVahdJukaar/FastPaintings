@@ -1,2 +1,1 @@
-fixed an issue
-added painting to carryon blacklist
+fixed missing loot table ue to 1.21 renames
