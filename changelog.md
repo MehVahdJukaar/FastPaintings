@@ -1,1 +1,1 @@
-fixed missing loot table ue to 1.21 renames
+fixed to work witn newest neoforge
