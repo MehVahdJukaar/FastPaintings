@@ -1,12 +1,17 @@
 package net.mehvahdjukaar.fastpaintings.neoforge;
 
+import net.mehvahdjukaar.fastpaintings.NBTDropMode;
 import net.mehvahdjukaar.fastpaintings.FastPaintings;
 import net.mehvahdjukaar.fastpaintings.FastPaintingsClient;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.Items;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.event.IModBusEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
 
 import static net.mehvahdjukaar.fastpaintings.FastPaintings.MOD_ID;
 
@@ -23,7 +28,6 @@ public class FastPaintingsForge {
         if (PlatHelper.getPhysicalSide().isClient()) {
             FastPaintingsClient.init();
         }
-
     }
 
 }

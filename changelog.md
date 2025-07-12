@@ -1,1 +1,3 @@
-fixed to work witn newest neoforge
+- improved drop logic
+- drop config also works with painting entities
+- fixed creative drop

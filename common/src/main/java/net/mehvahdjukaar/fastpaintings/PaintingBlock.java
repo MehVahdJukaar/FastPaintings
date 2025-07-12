@@ -12,7 +12,7 @@ import net.minecraft.world.Containers;
 import net.minecraft.world.entity.decoration.HangingEntity;
 import net.minecraft.world.entity.decoration.Painting;
 import net.minecraft.world.entity.decoration.PaintingVariant;
-import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.CustomData;
@@ -55,37 +55,66 @@ public class PaintingBlock extends WaterBlock implements EntityBlock {
                 .setValue(FACING, Direction.NORTH));
     }
 
+
     @Override
-    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
-        DropMode mode = FastPaintings.SPECIAL_DROP.get();
-        if (mode != DropMode.OFF) {
-            if (isMaster(state)) {
-                PaintingBlockEntity m = getMaster(state, pos, level);
-                ItemStack itemStack = new ItemStack(Items.PAINTING);
-                if (m != null && (mode == DropMode.ALWAYS || m.isPlacedWithNbt())) {
-                    CompoundTag compoundTag = new CompoundTag();
-
-                    Painting.VARIANT_CODEC.encodeStart(level.registryAccess()
-                            .createSerializationContext(NbtOps.INSTANCE), m.getVariant()).ifSuccess((tag) -> {
-                        compoundTag.merge((CompoundTag) tag);
-                    });
-                    compoundTag.putString("id", "minecraft:painting");
-
-                    itemStack.set(DataComponents.ENTITY_DATA, CustomData.of(compoundTag));
-
-                }
-                Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), itemStack);
-            }
+    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
+        var m = getMaster(state, pos, level);
+        if (m != null && !m.hasDroppedItemHack) {
+            m.hasDroppedItemHack = true; //hack to prevent double drops
+            var v = m.getPaintingDropLocation();
+            ItemStack painting = getCloneItemStack(level, pos, state);
+            Containers.dropItemStack(level, v.x, v.y, v.z, painting);
         }
         super.onRemove(state, level, pos, newState, movedByPiston);
     }
 
+    //this is better but we still cant use it all the way since it will not be called for pistons and such
+    @Override
+    public BlockState playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
+        var m = getMaster(state, pos, level);
+        if (m != null && !m.hasDroppedItemHack) {
+            m.hasDroppedItemHack = true; //hack to prevent double drops
+            if (!player.isCreative()) {
+                ItemStack painting = getCloneItemStack(level, pos, state);
+                Containers.dropItemStack(level, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, painting);
+            }
+        }
+        return super.playerWillDestroy(level, pos, state, player);
+    }
+
+    //we cant use this. it gets called with only the local block entity and the master tile is gone aleady
     @Override
     public List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
-        if (FastPaintings.SPECIAL_DROP.get() != DropMode.OFF) {
-            return List.of();
-        }
         return super.getDrops(state, params);
+    }
+
+
+    @Override
+    public ItemStack getCloneItemStack(LevelReader level, BlockPos pos, BlockState state) {
+        PaintingBlockEntity m = getMaster(state, pos, level);
+        if (m != null) {
+            return getPaintingItem(level, m.getVariant(), m.isPlacedWithNbt());
+        }
+        return new ItemStack(Items.PAINTING);
+    }
+
+    public static ItemStack getPaintingItem(LevelReader level, Holder<PaintingVariant> variant, boolean wasPlacedWithNbt) {
+        NBTDropMode mode = FastPaintings.SPECIAL_DROP.get();
+        ItemStack itemStack = new ItemStack(Items.PAINTING);
+        if (mode == NBTDropMode.OFF || (mode == NBTDropMode.WHEN_PLACED_WITH_NBT && !wasPlacedWithNbt)) {
+            return itemStack;
+        }
+
+        CompoundTag compoundTag = new CompoundTag();
+
+        Painting.VARIANT_CODEC.encodeStart(level.registryAccess()
+                .createSerializationContext(NbtOps.INSTANCE), variant).ifSuccess((tag) -> {
+            compoundTag.merge((CompoundTag) tag);
+        });
+        compoundTag.putString("id", "minecraft:painting");
+
+        itemStack.set(DataComponents.ENTITY_DATA, CustomData.of(compoundTag));
+        return itemStack;
     }
 
     @Override
@@ -110,10 +139,10 @@ public class PaintingBlock extends WaterBlock implements EntityBlock {
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext collisionContext) {
         return switch (state.getValue(FACING)) {
-            default -> SHAPE_NORTH;
             case SOUTH -> SHAPE_SOUTH;
             case WEST -> SHAPE_WEST;
             case EAST -> SHAPE_EAST;
+            default -> SHAPE_NORTH;
         };
     }
 
@@ -189,13 +218,6 @@ public class PaintingBlock extends WaterBlock implements EntityBlock {
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return isMaster(state) ? new PaintingBlockEntity(pos, state) : null;
-    }
-
-
-    @Override
-    public ItemStack getCloneItemStack(LevelReader level, BlockPos pos, BlockState state) {
-        return Items.PAINTING.getDefaultInstance();
-        //TODO: proper way with block item map
     }
 
 

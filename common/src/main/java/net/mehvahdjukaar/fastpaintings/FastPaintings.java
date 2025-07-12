@@ -23,7 +23,7 @@ public class FastPaintings {
     public static final String MOD_ID = "fastpaintings";
     public static final Logger LOGGER = LogManager.getLogger("Fast Paintings");
 
-    public static final Supplier<DropMode> SPECIAL_DROP;
+    public static final Supplier<NBTDropMode> SPECIAL_DROP;
     public static final ModConfigHolder CONFIG;
 
     public static ResourceLocation res(String name) {
@@ -56,8 +56,9 @@ public class FastPaintings {
     static {
         ConfigBuilder builder = ConfigBuilder.create(MOD_ID, ConfigType.COMMON);
         builder.push("general");
-        SPECIAL_DROP = builder.comment("Makes paintings always drop with their NBT")
-                .define("nbt_drop", DropMode.OFF);
+        SPECIAL_DROP = PlatHelper.isModLoaded("easel_does_it") ? () -> NBTDropMode.ALWAYS :
+                builder.comment("Makes paintings always drop with their NBT")
+                        .define("nbt_drop", NBTDropMode.OFF);
         builder.pop();
 
         CONFIG = builder.build();

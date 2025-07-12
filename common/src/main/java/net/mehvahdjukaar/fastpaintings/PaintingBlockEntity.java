@@ -5,6 +5,7 @@ import net.mehvahdjukaar.moonlight.api.client.model.IExtraModelDataProvider;
 import net.mehvahdjukaar.moonlight.api.client.model.ModelDataKey;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
@@ -19,8 +20,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 
 public class PaintingBlockEntity extends BlockEntity implements IExtraModelDataProvider, VariantHolder<Holder<PaintingVariant>> {
@@ -91,4 +92,20 @@ public class PaintingBlockEntity extends BlockEntity implements IExtraModelDataP
     public void addExtraModelData(ExtraModelData.Builder builder) {
         builder.with(MIMIC_KEY, this.getVariant().value());
     }
+
+    public Vec3 getPaintingDropLocation() {
+        int w = this.getVariant().value().width();
+        int h = this.getVariant().value().height();
+        BlockPos pos = this.getBlockPos();
+        Direction dir = this.getBlockState().getValue(PaintingBlock.FACING);
+        return switch (dir) {
+            case NORTH -> new Vec3(pos.getX() + 0.5, pos.getY() + h / 2.0, pos.getZ() - w / 2.0);
+            case SOUTH -> new Vec3(pos.getX() + 0.5, pos.getY() + h / 2.0, pos.getZ() + w + 0.5);
+            case WEST -> new Vec3(pos.getX() - w / 2.0, pos.getY() + h / 2.0, pos.getZ() + 0.5);
+            case EAST -> new Vec3(pos.getX() + w + 0.5, pos.getY() + h / 2.0, pos.getZ() + 0.5);
+            default -> throw new IllegalStateException("Unexpected value: " + dir);
+        };
+    }
+
+    boolean hasDroppedItemHack = false;
 }

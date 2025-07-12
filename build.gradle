@@ -1,6 +1,6 @@
 plugins {
     id "architectury-plugin" version "3.4-SNAPSHOT"
-    id "dev.architectury.loom" version "1.6-SNAPSHOT" apply false
+    id "dev.architectury.loom" version "1.9-SNAPSHOT" apply false
     id 'io.github.juuxel.loom-quiltflower' version '1.7.1' apply false
     id "com.matthewprenger.cursegradle" version "1.4.0"
     id "com.modrinth.minotaur" version "2.+"
@@ -68,14 +68,16 @@ subprojects {
                 loaders = ["neoforge"]
             } else loaders = [modLoader]
             changelog = changelogText
-            versionNumber = modLoader +"_"+ mod_version
+            versionNumber = modLoader + "_" + mod_version
             versionType = release_type
             if (modLoader == "fabric") {
                 dependencies {
                     required.project "fabric-api"
+                    required.project "moonlight"
                 }
             } else {
                 dependencies {
+                    required.project "moonlight"
                 }
             }
         }
@@ -88,7 +90,7 @@ subprojects {
                 id = project_id
                 changelog = changelogText
                 releaseType = release_type
-                for (var ver : versions){
+                for (var ver : versions) {
                     addGameVersion ver
                 }
 
@@ -102,8 +104,12 @@ subprojects {
                 if (modLoader == "fabric") {
                     relations {
                         requiredDependency "fabric-api"
+                        requiredDependency "selene"
                     }
                 } else {
+                    relations {
+                        requiredDependency "selene"
+                    }
                 }
             }
         }
@@ -177,7 +183,7 @@ allprojects {
 }
 
 
-ext{
+ext {
     replaceProperties = [
             minecraft_version    : minecraft_version,
             minecraft_min_version: minecraft_min_version,
