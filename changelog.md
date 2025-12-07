@@ -1,3 +1,1 @@
-- improved drop logic
-- drop config also works with painting entities
-- fixed creative drop
+- fixed paintings being capped at 5x5 instead of 16x16

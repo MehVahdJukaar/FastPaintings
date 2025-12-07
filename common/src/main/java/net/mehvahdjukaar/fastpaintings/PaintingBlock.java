@@ -44,8 +44,8 @@ public class PaintingBlock extends WaterBlock implements EntityBlock {
     protected static final VoxelShape SHAPE_EAST = MthUtils.rotateVoxelShape(SHAPE_NORTH, Direction.EAST);
     protected static final VoxelShape SHAPE_WEST = MthUtils.rotateVoxelShape(SHAPE_NORTH, Direction.WEST);
     protected static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
-    protected static final IntegerProperty DOWN_OFFSET = IntegerProperty.create("y_offset", 0, 5);
-    protected static final IntegerProperty RIGHT_OFFSET = IntegerProperty.create("x_offset", 0, 5);
+    protected static final IntegerProperty DOWN_OFFSET = IntegerProperty.create("y_offset", 0, 15);
+    protected static final IntegerProperty RIGHT_OFFSET = IntegerProperty.create("x_offset", 0, 15);
 
     public PaintingBlock(Properties properties) {
         super(properties);
