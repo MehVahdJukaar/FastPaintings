@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.fastpaintings.neoforge;
+package net.mehvahdjukaar.fastpaintings.platform;
 
 import net.mehvahdjukaar.fastpaintings.NBTDropMode;
 import net.mehvahdjukaar.fastpaintings.FastPaintings;

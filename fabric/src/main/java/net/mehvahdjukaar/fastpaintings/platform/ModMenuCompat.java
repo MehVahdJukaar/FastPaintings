@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.fastpaintings.fabric;
+package net.mehvahdjukaar.fastpaintings.platform;
 
 import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import com.terraformersmc.modmenu.api.ModMenuApi;
