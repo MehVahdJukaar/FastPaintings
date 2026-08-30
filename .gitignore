@@ -18,16 +18,8 @@ classes/
 .settings
 *.launch
 /unique_lines.txt
-/.junie/
-/.codex
-/.aiassistant/
-/.ai/
-/.claude/
-/.cursor/
 /common/build/
 /fabric/build/
 /neoforge/build/
 /forge/build/
-/CLAUDE.md
-/AGENTS.md
 /ARCHITECTURE.md
