@@ -1,1 +1,1 @@
-- fixed paintings being capped at 5x5 instead of 16x16
+- ported to 26.1.2

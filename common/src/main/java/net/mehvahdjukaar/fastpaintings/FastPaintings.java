@@ -5,9 +5,8 @@ import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -26,8 +25,8 @@ public class FastPaintings {
     public static final Supplier<NBTDropMode> SPECIAL_DROP;
     public static final ModConfigHolder CONFIG;
 
-    public static ResourceLocation res(String name) {
-        return ResourceLocation.fromNamespaceAndPath(MOD_ID, name);
+    public static Identifier res(String name) {
+        return Identifier.fromNamespaceAndPath(MOD_ID, name);
     }
 
     public static final SoundType PAINTING = new SoundType(1.0F, 1.0F,
@@ -35,21 +34,21 @@ public class FastPaintings {
             SoundEvents.PAINTING_PLACE, SoundEvents.WOOD_HIT,
             SoundEvents.WOOD_FALL);
 
-    public static final Supplier<Block> PAINTING_BLOCK = RegHelper.registerBlock(
+    public static final Supplier<PaintingBlock> PAINTING_BLOCK = RegHelper.registerBlock(
             res("painting"),
-            () -> new PaintingBlock(BlockBehaviour.Properties.of()
+            PaintingBlock::new,
+            BlockBehaviour.Properties.of()
                     .pushReaction(PushReaction.DESTROY)
                     .mapColor(MapColor.NONE)
                     .noOcclusion()
                     .instabreak()
-                    .sound(PAINTING))
-
-
+                    .sound(PAINTING)
     );
 
     public static final Supplier<BlockEntityType<PaintingBlockEntity>> PAINTING_TILE = RegHelper.registerBlockEntityType(
             res("painting"),
-            () -> PlatHelper.newBlockEntityType(PaintingBlockEntity::new, PAINTING_BLOCK.get())
+            PaintingBlockEntity::new,
+            PAINTING_BLOCK
     );
 
 
@@ -57,7 +56,7 @@ public class FastPaintings {
         ConfigBuilder builder = ConfigBuilder.create(MOD_ID, ConfigType.COMMON);
         builder.push("general");
         SPECIAL_DROP = PlatHelper.isModLoaded("easel_does_it") ? () -> NBTDropMode.ALWAYS :
-                builder.comment("Makes paintings always drop with their NBT")
+                builder.comment("Makes paintings always drop with their painting variant")
                         .define("nbt_drop", NBTDropMode.OFF);
         builder.pop();
 

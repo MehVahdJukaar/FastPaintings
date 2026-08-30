@@ -1,24 +1,15 @@
 package net.mehvahdjukaar.fastpaintings;
 
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.resources.ResourceLocation;
 
 public class FastPaintingsClient {
 
-    public static final ResourceLocation PAINTING_SHEET = ResourceLocation.withDefaultNamespace("paintings");
-
     public static void init() {
-        ClientHelper.addClientSetup(FastPaintingsClient::setup);
-        ClientHelper.addModelLoaderRegistration(FastPaintingsClient::registerModelLoaders);
+        ClientHelper.addBlockModelRegistration(FastPaintingsClient::registerBlockModels);
     }
 
-    public static void setup() {
-        ClientHelper.registerRenderType(FastPaintings.PAINTING_BLOCK.get(), RenderType.cutout());
-    }
-
-    private static void registerModelLoaders(ClientHelper.ModelLoaderEvent event) {
-        event.register(FastPaintings.res("painting"), new PaintingBlockModelLoader());
+    private static void registerBlockModels(ClientHelper.BlockModelEvent event) {
+        event.register(FastPaintings.res("painting"), PaintingBlockModel.Unbaked.CODEC);
     }
 
 }

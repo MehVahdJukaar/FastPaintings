@@ -1,19 +1,43 @@
 {
   "variants": {
     "facing=east": {
-      "model": "fastpaintings:block/painting",
-      "y": 270
+      "type": "fastpaintings:painting",
+      "fabric:type": "fastpaintings:painting",
+      "models": {
+        "center": {
+          "model": "fastpaintings:block/painting_model",
+          "y": 270
+        }
+      }
     },
     "facing=north": {
-      "model": "fastpaintings:block/painting",
-      "y": 180
+      "type": "fastpaintings:painting",
+      "fabric:type": "fastpaintings:painting",
+      "models": {
+        "center": {
+          "model": "fastpaintings:block/painting_model",
+          "y": 180
+        }
+      }
     },
     "facing=south": {
-      "model": "fastpaintings:block/painting"
+      "type": "fastpaintings:painting",
+      "fabric:type": "fastpaintings:painting",
+      "models": {
+        "center": {
+          "model": "fastpaintings:block/painting_model"
+        }
+      }
     },
     "facing=west": {
-      "model": "fastpaintings:block/painting",
-      "y": 90
+      "type": "fastpaintings:painting",
+      "fabric:type": "fastpaintings:painting",
+      "models": {
+        "center": {
+          "model": "fastpaintings:block/painting_model",
+          "y": 90
+        }
+      }
     }
   }
 }

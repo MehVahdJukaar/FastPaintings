@@ -4,10 +4,8 @@ import net.mehvahdjukaar.fastpaintings.PaintingBlock;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.decoration.BlockAttachedEntity;
-import net.minecraft.world.entity.decoration.HangingEntity;
-import net.minecraft.world.entity.decoration.Painting;
+import net.minecraft.world.entity.decoration.painting.Painting;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -22,7 +20,7 @@ public abstract class HangingentityMixin extends Entity {
 
     @Inject(method = "tick", at = @At("RETURN"))
     public void tick(CallbackInfo ci) {
-        if (this.tickCount < 3 && !level().isClientSide && this.isAlive() && this.getType() == EntityType.PAINTING) {
+        if (this.tickCount < 3 && !level().isClientSide() && this.isAlive() && this.getType() == EntityType.PAINTING) {
             PaintingBlock.tryConverting((Painting) (Object) this, null);
         }
     }

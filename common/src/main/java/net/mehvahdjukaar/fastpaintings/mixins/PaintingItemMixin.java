@@ -6,7 +6,7 @@ import com.llamalad7.mixinextras.sugar.Local;
 import net.mehvahdjukaar.fastpaintings.PaintingBlock;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.decoration.Painting;
+import net.minecraft.world.entity.decoration.painting.Painting;
 import net.minecraft.world.item.HangingEntityItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;

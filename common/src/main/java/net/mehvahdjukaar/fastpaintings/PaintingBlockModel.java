@@ -1,47 +1,49 @@
 package net.mehvahdjukaar.fastpaintings;
 
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import net.mehvahdjukaar.moonlight.api.client.model.CustomBakedModel;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.mehvahdjukaar.moonlight.api.client.model.CustomBlockModel;
+import net.mehvahdjukaar.moonlight.api.client.model.CustomUnbakedModel;
 import net.mehvahdjukaar.moonlight.api.client.model.ExtraModelData;
+import net.mehvahdjukaar.moonlight.api.client.model.QuadEmitter;
+import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.block.model.ItemOverrides;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
+import net.minecraft.client.model.geom.builders.UVPair;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.PaintingTextureManager;
-import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.resources.model.ModelBaker;
+import net.minecraft.client.resources.model.ResolvableModel;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.data.AtlasIds;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.entity.decoration.PaintingVariant;
-import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.entity.decoration.painting.PaintingVariant;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 
-public class PaintingBlockModel implements CustomBakedModel {
+public class PaintingBlockModel implements CustomBlockModel {
 
-    public static final ResourceLocation BACK_TEXTURE = ResourceLocation.withDefaultNamespace("painting/back");
+    private final BlockStateModel[] models = new BlockStateModel[16];
 
-    private final BakedModel[] models = new BakedModel[16];
-
-    public PaintingBlockModel(Map<String, BakedModel> paintingModels) {
+    public PaintingBlockModel(Map<String, BlockStateModel> paintingModels) {
         for (var e : paintingModels.entrySet()) {
             String k = e.getKey();
-            int i = getIndex(k.contains("top"), k.contains("bottom"), k.contains("left"), k.contains("right"));
-            models[i] = e.getValue();
+            models[getIndex(k.contains("top"), k.contains("bottom"), k.contains("left"), k.contains("right"))] = e.getValue();
         }
     }
 
-    public int getIndex(boolean top, boolean bottom, boolean left, boolean right) {
+    private static int getIndex(boolean top, boolean bottom, boolean left, boolean right) {
         int index = 0;
 
         index |= (top ? 1 : 0) << 3;
@@ -52,126 +54,119 @@ public class PaintingBlockModel implements CustomBakedModel {
         return index;
     }
 
-
     @Override
-    public List<BakedQuad> getBlockQuads(BlockState state, Direction side,
-                                         RandomSource rand, RenderType renderType,
-                                         ExtraModelData data) {
-
-        PaintingVariant variant = data.get(PaintingBlockEntity.MIMIC_KEY);
-        if (variant == null) {
-            return List.of();
-        }
-
-        PaintingTextureManager paintingTextureManager = Minecraft.getInstance().getPaintingTextures();
-        ResourceLocation paintingTexture = paintingTextureManager.get(variant).contents().name();
-        TextureAtlasSprite sprite = Minecraft.getInstance().getTextureAtlas(TextureAtlas.LOCATION_BLOCKS)
-                .apply(ResourceLocation.fromNamespaceAndPath(paintingTexture.getNamespace(), "painting/" + paintingTexture.getPath()));
+    public void emitQuads(QuadEmitter emitter, @Nullable BlockAndTintGetter level, @Nullable BlockPos pos,
+                          @Nullable BlockState state, RandomSource random, ExtraModelData data) {
+        if (state == null) return;
+        PaintingVariant variant = getVariant(data, level, pos, state);
+        if (variant == null) return;
 
         int paintingW = variant.width();
         int paintingH = variant.height();
-        float segmentWScale = sprite.contents().width() / (float) (paintingW * 16);
-        float segmentHScale = sprite.contents().height() / (float) (paintingH * 16);
-
         int rightOffset = state.getValue(PaintingBlock.RIGHT_OFFSET);
         int downOffset = state.getValue(PaintingBlock.DOWN_OFFSET);
+        TextureAtlasSprite sprite = getPaintingSprite(variant);
 
+        emitSlice(emitter, this.models[0], level, pos, state, random, sprite,
+                paintingW, paintingH, rightOffset, downOffset);
 
-        float spriteRightOff = rightOffset * (sprite.getU1() - sprite.getU0()) / paintingW;
-        float spriteDownOff = downOffset * (sprite.getV1() - sprite.getV0()) / paintingH;
+        int index = getIndex(downOffset == 0, downOffset == paintingH - 1,
+                rightOffset == 0, rightOffset == paintingW - 1);
+        if (index != 0) {
+            emitSlice(emitter, this.models[index], level, pos, state, random, sprite,
+                    paintingW, paintingH, rightOffset, downOffset);
+        }
+    }
 
+    @Nullable
+    private static PaintingVariant getVariant(ExtraModelData data, @Nullable BlockAndTintGetter level,
+                                              @Nullable BlockPos pos, BlockState state) {
+        PaintingVariant variant = data.get(PaintingBlockEntity.MIMIC_KEY);
+        if (variant == null && level != null && pos != null && !PaintingBlock.isMaster(state)) {
+            PaintingBlockEntity master = PaintingBlock.getMaster(state, pos, level);
+            if (master != null) variant = master.getVariant().value();
+        }
+        return variant;
+    }
 
-        List<BakedQuad> combinedQuads = new ArrayList<>();
+    private static TextureAtlasSprite getPaintingSprite(PaintingVariant variant) {
+        Identifier assetId = variant.assetId();
+        return Minecraft.getInstance().getAtlasManager().getAtlasOrThrow(AtlasIds.BLOCKS)
+                .getSprite(Identifier.fromNamespaceAndPath(assetId.getNamespace(), "painting/" + assetId.getPath()));
+    }
 
-
-        List<BakedModel> bakedModels = new ArrayList<>();
-        bakedModels.add(this.models[0]);
-        int index = getIndex(downOffset == 0, downOffset == paintingH - 1, rightOffset == 0, rightOffset == paintingW - 1);
-        bakedModels.add(this.models[index]);
-
-        for (var model : bakedModels) {
-            if (model == null) continue;
-            List<BakedQuad> quads = model.getQuads(null, side, rand);
-            for (BakedQuad q : quads) {
-                TextureAtlasSprite oldSprite = q.getSprite();
-                if (oldSprite.contents().name().equals(MissingTextureAtlasSprite.getLocation())) {
-                    int stride = DefaultVertexFormat.BLOCK.getVertexSize() / 4;
-                    stride = 8;
-                    int[] v = Arrays.copyOf(q.getVertices(), q.getVertices().length);
-                    for (int i = 0; i < v.length / stride; i++) {
-                        float originalU = Float.intBitsToFloat(v[i * stride + 4]);
-                        float originalV = Float.intBitsToFloat(v[i * stride + 5]);
-
-                        float u1 = (originalU - oldSprite.getU0()) * segmentWScale + spriteRightOff;
-                        v[i * stride + 4] = Float.floatToRawIntBits(u1 + sprite.getU0());
-
-                        float v1 = (originalV - oldSprite.getV0()) * segmentHScale + spriteDownOff;
-                        v[i * stride + 5] = Float.floatToRawIntBits(v1 + sprite.getV0());
-                    }
-                    combinedQuads.add(new BakedQuad(v, q.getTintIndex(), q.getDirection(), sprite, q.isShade()));
-                } else combinedQuads.add(q);
+    private static void emitSlice(QuadEmitter emitter, @Nullable BlockStateModel model,
+                                  @Nullable BlockAndTintGetter level, @Nullable BlockPos pos,
+                                  @Nullable BlockState state, RandomSource random, TextureAtlasSprite sprite,
+                                  int paintingW, int paintingH, int rightOffset, int downOffset) {
+        if (model == null) return;
+        List<BlockStateModelPart> parts = new ArrayList<>();
+        ClientHelper.collectModelParts(model, level, pos, state, random, parts);
+        for (BlockStateModelPart part : parts) {
+            for (Direction dir : Direction.values()) {
+                emitter.cullFace(dir);
+                emitQuads(emitter, part.getQuads(dir), sprite, paintingW, paintingH, rightOffset, downOffset);
             }
+            emitter.cullFace(null);
+            emitQuads(emitter, part.getQuads(null), sprite, paintingW, paintingH, rightOffset, downOffset);
         }
-        return combinedQuads;
     }
 
-
-    /**
-     * BakedModel itemModel = Minecraft.getInstance().getItemRenderer().getModel(Items.NETHER_STAR.getDefaultInstance(),
-     * null, null, 0);
-     * var p = new PoseStack();
-     * itemModel.getTransforms().getTransform(ItemDisplayContext.GROUND).apply(false, p);
-     * <p>
-     * for(var q : itemModel.getQuads(null, side, rand)){
-     * int[] v = Arrays.copyOf(q.getVertices(), q.getVertices().length);
-     * transformVertices(v, p.last().pose());
-     * combinedQuads.add(new BakedQuad(v, q.getTintIndex(), q.getDirection(), sprite, q.isShade()));
-     * }
-     */
-
-
-    @Override
-    public ExtraModelData getModelData(@Nullable ExtraModelData originalTileData, BlockPos pos, BlockState state, BlockAndTintGetter level) {
-        if (state.getBlock() instanceof PaintingBlock && !PaintingBlock.isMaster(state)) {
-            var tile = PaintingBlock.getMaster(state, pos, level);
-            if (tile != null) return tile.getExtraModelData();
+    private static void emitQuads(QuadEmitter emitter, List<BakedQuad> quads, TextureAtlasSprite sprite,
+                                  int paintingW, int paintingH, int rightOffset, int downOffset) {
+        for (BakedQuad q : quads) {
+            emitter.fromQuad(q);
+            TextureAtlasSprite oldSprite = q.materialInfo().sprite();
+            if (oldSprite.contents().name().equals(MissingTextureAtlasSprite.getLocation())) {
+                emitter.sprite(sprite);
+                for (int i = 0; i < QuadEmitter.VERTICES; i++) {
+                    long uv = q.packedUV(i);
+                    float u = unlerp(UVPair.unpackU(uv), oldSprite.getU0(), oldSprite.getU1());
+                    float v = unlerp(UVPair.unpackV(uv), oldSprite.getV0(), oldSprite.getV1());
+                    emitter.uv(i, (u + rightOffset) / paintingW, (v + downOffset) / paintingH);
+                }
+            }
+            emitter.emit();
         }
-        return originalTileData;
+    }
+
+    private static float unlerp(float value, float min, float max) {
+        float range = max - min;
+        return range == 0 ? 0 : (value - min) / range;
     }
 
     @Override
-    public TextureAtlasSprite getBlockParticle(ExtraModelData data) {
-        return models[0].getParticleIcon();
-    }
-
-
-    @Override
-    public boolean useAmbientOcclusion() {
-        return true;
+    public TextureAtlasSprite getParticle(ExtraModelData data) {
+        return this.models[0].particleMaterial().sprite();
     }
 
     @Override
-    public boolean isGui3d() {
-        return false;
+    public @Nullable Object geometryKey(BlockAndTintGetter level, BlockPos pos, BlockState state,
+                                        RandomSource random, ExtraModelData data) {
+        return getVariant(data, level, pos, state);
     }
 
-    @Override
-    public boolean usesBlockLight() {
-        return false;
-    }
+    public record Unbaked(Map<String, BlockStateModel.Unbaked> models) implements CustomUnbakedModel {
 
-    @Override
-    public boolean isCustomRenderer() {
-        return false;
-    }
+        public static final MapCodec<Unbaked> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
+                Codec.unboundedMap(Codec.STRING, BlockStateModel.Unbaked.CODEC).fieldOf("models").forGetter(Unbaked::models)
+        ).apply(i, Unbaked::new));
 
-    @Override
-    public ItemOverrides getOverrides() {
-        return ItemOverrides.EMPTY;
-    }
+        @Override
+        public CustomBlockModel bake(ModelBaker baker) {
+            Map<String, BlockStateModel> baked = new HashMap<>();
+            this.models.forEach((key, unbaked) -> baked.put(key, unbaked.bake(baker)));
+            return new PaintingBlockModel(baked);
+        }
 
-    @Override
-    public ItemTransforms getTransforms() {
-        return ItemTransforms.NO_TRANSFORMS;
+        @Override
+        public MapCodec<? extends CustomUnbakedModel> codec() {
+            return CODEC;
+        }
+
+        @Override
+        public void resolveDependencies(ResolvableModel.Resolver resolver) {
+            this.models.values().forEach(m -> m.resolveDependencies(resolver));
+        }
     }
 }

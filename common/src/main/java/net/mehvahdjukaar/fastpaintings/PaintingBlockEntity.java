@@ -11,20 +11,20 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.VariantHolder;
-import net.minecraft.world.entity.decoration.PaintingVariant;
-import net.minecraft.world.entity.decoration.PaintingVariants;
+import net.minecraft.world.Containers;
+import net.minecraft.world.entity.decoration.painting.PaintingVariant;
+import net.minecraft.world.entity.decoration.painting.PaintingVariants;
+import net.minecraft.world.entity.variant.VariantUtils;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
 
 
-public class PaintingBlockEntity extends BlockEntity implements IExtraModelDataProvider, VariantHolder<Holder<PaintingVariant>> {
+public class PaintingBlockEntity extends BlockEntity implements IExtraModelDataProvider {
 
     public static final ModelDataKey<PaintingVariant> MIMIC_KEY = new ModelDataKey<>(PaintingVariant.class);
 
@@ -33,31 +33,33 @@ public class PaintingBlockEntity extends BlockEntity implements IExtraModelDataP
 
     public PaintingBlockEntity(BlockPos blockPos, BlockState blockState) {
         super(FastPaintings.PAINTING_TILE.get(), blockPos, blockState);
-        this.variant = getDefaultVariant(Utils.hackyGetRegistryAccess().registryOrThrow(Registries.PAINTING_VARIANT).asLookup());
+        this.variant = VariantUtils.getDefaultOrAny(Utils.hackyGetRegistryAccess(), PaintingVariants.KEBAB);
         Item.BY_BLOCK.put(FastPaintings.PAINTING_BLOCK.get(), Items.PAINTING);
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
-        ResourceKey<PaintingVariant> resourceKey = ResourceKey.create(Registries.PAINTING_VARIANT,
-                ResourceLocation.tryParse(tag.getString("variant")));
-        var paintingsReg = registries.lookupOrThrow(Registries.PAINTING_VARIANT);
-        this.setVariant(paintingsReg.get(resourceKey)
-                .orElseGet(() -> getDefaultVariant(paintingsReg)));
-        placedWithNbt = tag.getBoolean("placed_with_nbt");
-    }
-
-    @NotNull
-    private static Holder.Reference<PaintingVariant> getDefaultVariant(HolderLookup.RegistryLookup<PaintingVariant> reg) {
-        return reg.getOrThrow(PaintingVariants.KEBAB);
+    protected void loadAdditional(ValueInput input) {
+        super.loadAdditional(input);
+        VariantUtils.readVariant(input, Registries.PAINTING_VARIANT).ifPresent(this::setVariant);
+        placedWithNbt = input.getBooleanOr("placed_with_nbt", false);
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
-        tag.putString("variant", this.getVariant().unwrapKey().orElse(PaintingVariants.KEBAB).location().toString());
-        tag.putBoolean("placed_with_nbt", placedWithNbt);
+    protected void saveAdditional(ValueOutput output) {
+        super.saveAdditional(output);
+        VariantUtils.writeVariant(output, this.variant);
+        output.putBoolean("placed_with_nbt", placedWithNbt);
+    }
+
+    @Override
+    public void preRemoveSideEffects(BlockPos pos, BlockState state) {
+        super.preRemoveSideEffects(pos, state);
+        if (this.level != null && !this.hasDroppedItemHack) {
+            this.hasDroppedItemHack = true;
+            Vec3 v = this.getPaintingDropLocation();
+            Containers.dropItemStack(this.level, v.x, v.y, v.z,
+                    PaintingBlock.getPaintingItem(this.variant, this.placedWithNbt));
+        }
     }
 
     public void setVariant(Holder<PaintingVariant> variant) {
