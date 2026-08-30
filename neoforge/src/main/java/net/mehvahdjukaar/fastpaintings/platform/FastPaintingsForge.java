@@ -3,7 +3,6 @@ package net.mehvahdjukaar.fastpaintings.platform;
 import net.mehvahdjukaar.fastpaintings.FastPaintings;
 import net.mehvahdjukaar.fastpaintings.FastPaintingsClient;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
-import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 
@@ -17,7 +16,6 @@ public class FastPaintingsForge {
 
 
     public FastPaintingsForge(IEventBus busEvent) {
-        RegHelper.startRegisteringFor(busEvent);
         FastPaintings.init();
         if (PlatHelper.getPhysicalSide().isClient()) {
             FastPaintingsClient.init();

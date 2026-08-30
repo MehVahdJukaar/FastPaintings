@@ -96,17 +96,14 @@ public class PaintingBlockEntity extends BlockEntity implements IExtraModelDataP
     }
 
     public Vec3 getPaintingDropLocation() {
-        int w = this.getVariant().value().width();
-        int h = this.getVariant().value().height();
+        PaintingVariant painting = this.getVariant().value();
+        Direction alongWidth = this.getBlockState().getValue(PaintingBlock.FACING).getCounterClockWise();
+        double halfWidth = (painting.width() - 1) / 2.0;
         BlockPos pos = this.getBlockPos();
-        Direction dir = this.getBlockState().getValue(PaintingBlock.FACING);
-        return switch (dir) {
-            case NORTH -> new Vec3(pos.getX() + 0.5, pos.getY() + h / 2.0, pos.getZ() - w / 2.0);
-            case SOUTH -> new Vec3(pos.getX() + 0.5, pos.getY() + h / 2.0, pos.getZ() + w + 0.5);
-            case WEST -> new Vec3(pos.getX() - w / 2.0, pos.getY() + h / 2.0, pos.getZ() + 0.5);
-            case EAST -> new Vec3(pos.getX() + w + 0.5, pos.getY() + h / 2.0, pos.getZ() + 0.5);
-            default -> throw new IllegalStateException("Unexpected value: " + dir);
-        };
+        return new Vec3(
+                pos.getX() + 0.5 + alongWidth.getStepX() * halfWidth,
+                pos.getY() + 0.5 - (painting.height() - 1) / 2.0,
+                pos.getZ() + 0.5 + alongWidth.getStepZ() * halfWidth);
     }
 
     boolean hasDroppedItemHack = false;

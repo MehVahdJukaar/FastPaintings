@@ -1,3 +1,6 @@
 {
-  "block.fastpaintings.painting": "Painting"
+  "block.fastpaintings.painting": "Painting",
+  "fastpaintings.configuration.general": "General",
+  "fastpaintings.configuration.general.nbt_drop": "Nbt Drop",
+  "fastpaintings.configuration.general.nbt_drop.description": "Makes paintings always drop with their painting variant"
 }
