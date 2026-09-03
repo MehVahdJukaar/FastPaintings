@@ -21,7 +21,6 @@ subprojects {
 
     apply(plugin = "com.possible-triangle.core")
     apply(plugin = "net.mehvahdjukaar.candlelight")
-    apply(plugin = "dev.mixinmcp.decompile")
     apply(plugin = "maven-publish")
 
     dependencies {
